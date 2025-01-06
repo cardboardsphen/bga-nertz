@@ -72,12 +72,7 @@ class Game extends \Table {
     /**
      * Game state actions
      */
-    public function stNextPlayer(): void {
-        $playerId = intval($this->getActivePlayerId());
-        $this->giveExtraTime($playerId);
-        $this->activeNextPlayer();
-        $this->gamestate->nextState('nextTurn');
-    }
+
 
     /**
      * This method is called each time it is the turn of a player who has quit the game (= "zombie" player).

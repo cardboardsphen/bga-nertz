@@ -38,6 +38,8 @@ export default class Nertz extends GameGui {
     override setup(gamedatas: BGA.Gamedatas | any): void {
         console.log('Starting game setup');
 
+        this.addBoardPieces(gamedatas);
+
         this.setupNotifications = () => {
             console.log('notifications subscriptions setup');
 
@@ -84,6 +86,15 @@ export default class Nertz extends GameGui {
 
     ///////////////////////////////////////////////////
     //// Utility functions
+    private addBoardPieces(gamedatas: BGA.Gamedatas | any): void {
+        document.getElementById('game_play_area')!.insertAdjacentHTML(
+            'beforeend',
+            `
+                <div id="board">
+                </div>
+            `
+        );
+    }
 }
 
 define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter'], dojo.declare('bgagame.nertz', ebg.core.gamegui, new Nertz()));
