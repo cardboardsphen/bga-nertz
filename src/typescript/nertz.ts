@@ -18,10 +18,11 @@
 /// <amd-module name="bgagame/nertz"/>
 /// <reference path="./types/all-bga-types.d.ts"/>
 
-import 'dojo';
-import 'dojo/_base/declare';
 import 'ebg/counter';
 import * as GameGui from 'ebg/core/gamegui';
+
+import * as dojo from 'dojo';
+import * as dom from 'dojo/dom';
 
 /**
  * Client implementation of Nertz.
@@ -87,7 +88,7 @@ export default class Nertz extends GameGui {
     ///////////////////////////////////////////////////
     //// Utility functions
     private addBoardPieces(gamedatas: BGA.Gamedatas | any): void {
-        document.getElementById('game_play_area')!.insertAdjacentHTML(
+        dom.byId('game_play_area')!.insertAdjacentHTML(
             'beforeend',
             `
                 <div id="board">
@@ -97,4 +98,4 @@ export default class Nertz extends GameGui {
     }
 }
 
-define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter'], dojo.declare('bgagame.nertz', ebg.core.gamegui, new Nertz()));
+dojo.declare('bgagame.nertz', GameGui, new Nertz());
