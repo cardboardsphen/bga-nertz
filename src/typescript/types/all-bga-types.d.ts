@@ -1,5 +1,5 @@
 /*
- * From https://github.com/NevinAF/bga-ts-template/tree/main
+ * Originally from https://github.com/NevinAF/bga-ts-template/tree/main
  *
  */
 
@@ -3211,6 +3211,125 @@ declare namespace DojoJS {
     }
 }
 declare namespace DojoJS {
+    class Color {
+        /** The red component of the color as an RGBA value. Always between 0-255. */
+        r: number;
+        /** The green component of the color as an RGBA value. Always between 0-255. */
+        g: number;
+        /** The blue component of the color as an RGBA value. Always between 0-255. */
+        b: number;
+        /** The alpha component of the color as an RGBA value. Always between 0-1. */
+        a: number;
+        /** Creates a new color object using the {@link setColor} method. */
+        constructor(
+            color?:
+                | any[]
+                | string
+                | {
+                      r: number;
+                      g: number;
+                      b: number;
+                      a: number;
+                  }
+        );
+        /** Takes a named string, hex string, array of rgb or rgba values,
+         * an object with r, g, b, and a properties, or another `Color` object
+         * and sets this color instance to that value.
+         */
+        setColor(
+            color?:
+                | any[]
+                | string
+                | {
+                      r: number;
+                      g: number;
+                      b: number;
+                      a: number;
+                  }
+        ): Color;
+        /**
+         * Ensures the object has correct attributes and all values are within the required ranges.
+         */
+        sanitize(): Color;
+        /**
+         * Returns 3 component array of rgb values
+         */
+        toRgb(): [number, number, number];
+        /**
+         * Returns a 4 component array of rgba values from the color represented by
+         * this object.
+         */
+        toRgba(): [number, number, number, number];
+        /**
+         * Returns a CSS color string in hexadecimal representation
+         */
+        toHex(): string;
+        /**
+         * Returns a css color string in rgb(a) representation
+         */
+        toCss(includeAlpha?: boolean): string;
+        /**
+         * Returns the css color string representation with alpha
+         */
+        toString(): string;
+        /**
+         * Sets the properties of the color object matching the given arguments.
+         */
+        _set(r: number, g: number, b: number, a: number): void;
+        /**
+         * Dictionary list of all CSS named colors, by name. Values are 3-item arrays with corresponding RG and B values.
+         */
+        static named: DojoJS.ColorNames;
+        /**
+         * Blend colors end and start with weight from 0 to 1, 0.5 being a 50/50 blend,
+         * can reuse a previously allocated Color object for the result
+         */
+        static blendColors(start: Color, end: Color, weight: number, obj?: Color): Color;
+        /**
+         * Returns a `Color` instance from a string of the form
+         * "rgb(...)" or "rgba(...)". Optionally accepts a `Color`
+         * object to update with the parsed value and return instead of
+         * creating a new object.
+         */
+        static fromRgb(color: string, obj?: Color): Color | null;
+        /**
+         * Converts a hex string with a '#' prefix to a color object.
+         * Supports 12-bit #rgb shorthand. Optionally accepts a
+         * `Color` object to update with the parsed value.
+         */
+        static fromHex<T extends string>(color: T, obj?: Color): T extends InferHexColor<T> ? Color : Color | null;
+        /**
+         * Builds a `Color` from a 3 or 4 element array, mapping each
+         * element in sequence to the rgb(a) values of the color.
+         */
+        static fromArray(color: any[], obj?: Color): Color;
+        /**
+         * Parses `str` for a color value. Accepts named color, hex, rgb, and rgba
+         * style color values.
+         */
+        static fromString<T extends string>(
+            str: T,
+            obj?: Color
+        ): T extends keyof DojoJS.ColorNames ? Color : T extends InferHexColor<T> ? Color : Color | null;
+        /**
+         * Returns a new `Color` instance based on the provided value (brightness) of a grayscale color.
+         * @throws {Error} "dojo/colors" has not been loaded and is needed to use this function
+         */
+        static makeGrey(value: string | number, alpha: string | number): Color;
+    }
+    interface Url {
+        uri: string;
+        scheme: string;
+        authority: string;
+        path: string;
+        query: string;
+        fragment: string;
+        user?: string;
+        password?: string;
+        host?: string;
+        port?: string;
+        toString(): string;
+    }
     interface ExtensionEvent {
         (target: Element | Record<string, any>, listener: EventListener): Handle;
     }
@@ -7760,14 +7879,18 @@ declare module 'dojo/dom-style' {
                 /**
                  * Accesses styles on a node.
                  */
-                get(node: Element | string): CSSStyleDeclaration;
-                get<T extends keyof CSSStyleDeclaration>(node: Element | string, name: T): CSSStyleDeclaration[T];
+                get(node: Element | string | Node): CSSStyleDeclaration;
+                get<T extends keyof CSSStyleDeclaration>(node: Element | string | Node, name: T): CSSStyleDeclaration[T];
                 /**
                  * Sets styles on a node.
                  */
-                set(node: Element | string, props: Partial<CSSStyleDeclaration>): CSSStyleDeclaration;
-                set(node: Element | string, name: 'opacity', value: number): number;
-                set<T extends keyof CSSStyleDeclaration>(node: Element | string, name: T, value: CSSStyleDeclaration[T]): CSSStyleDeclaration[T];
+                set(node: Element | string | Node, props: Partial<CSSStyleDeclaration>): CSSStyleDeclaration;
+                set(node: Element | string | Node, name: 'opacity', value: number): number;
+                set<T extends keyof CSSStyleDeclaration>(
+                    node: Element | string | Node,
+                    name: T,
+                    value: CSSStyleDeclaration[T]
+                ): CSSStyleDeclaration[T];
                 /**
                  * converts style value to pixels on IE or return a numeric value.
                  */
@@ -8421,112 +8544,6 @@ declare module 'dojo/_base/Color' {
         aqua: number[];
         transparent: [number, number, number] | [number, number, number, number];
     };
-    class Color {
-        /** The red component of the color as an RGBA value. Always between 0-255. */
-        r: number;
-        /** The green component of the color as an RGBA value. Always between 0-255. */
-        g: number;
-        /** The blue component of the color as an RGBA value. Always between 0-255. */
-        b: number;
-        /** The alpha component of the color as an RGBA value. Always between 0-1. */
-        a: number;
-        /** Creates a new color object using the {@link setColor} method. */
-        constructor(
-            color?:
-                | any[]
-                | string
-                | {
-                      r: number;
-                      g: number;
-                      b: number;
-                      a: number;
-                  }
-        );
-        /** Takes a named string, hex string, array of rgb or rgba values,
-         * an object with r, g, b, and a properties, or another `Color` object
-         * and sets this color instance to that value.
-         */
-        setColor(
-            color?:
-                | any[]
-                | string
-                | {
-                      r: number;
-                      g: number;
-                      b: number;
-                      a: number;
-                  }
-        ): Color;
-        /**
-         * Ensures the object has correct attributes and all values are within the required ranges.
-         */
-        sanitize(): Color;
-        /**
-         * Returns 3 component array of rgb values
-         */
-        toRgb(): [number, number, number];
-        /**
-         * Returns a 4 component array of rgba values from the color represented by
-         * this object.
-         */
-        toRgba(): [number, number, number, number];
-        /**
-         * Returns a CSS color string in hexadecimal representation
-         */
-        toHex(): string;
-        /**
-         * Returns a css color string in rgb(a) representation
-         */
-        toCss(includeAlpha?: boolean): string;
-        /**
-         * Returns the css color string representation with alpha
-         */
-        toString(): string;
-        /**
-         * Sets the properties of the color object matching the given arguments.
-         */
-        _set(r: number, g: number, b: number, a: number): void;
-        /**
-         * Dictionary list of all CSS named colors, by name. Values are 3-item arrays with corresponding RG and B values.
-         */
-        static named: DojoJS.ColorNames;
-        /**
-         * Blend colors end and start with weight from 0 to 1, 0.5 being a 50/50 blend,
-         * can reuse a previously allocated Color object for the result
-         */
-        static blendColors(start: Color, end: Color, weight: number, obj?: Color): Color;
-        /**
-         * Returns a `Color` instance from a string of the form
-         * "rgb(...)" or "rgba(...)". Optionally accepts a `Color`
-         * object to update with the parsed value and return instead of
-         * creating a new object.
-         */
-        static fromRgb(color: string, obj?: Color): Color | null;
-        /**
-         * Converts a hex string with a '#' prefix to a color object.
-         * Supports 12-bit #rgb shorthand. Optionally accepts a
-         * `Color` object to update with the parsed value.
-         */
-        static fromHex<T extends string>(color: T, obj?: Color): T extends InferHexColor<T> ? Color : Color | null;
-        /**
-         * Builds a `Color` from a 3 or 4 element array, mapping each
-         * element in sequence to the rgb(a) values of the color.
-         */
-        static fromArray(color: any[], obj?: Color): Color;
-        /**
-         * Parses `str` for a color value. Accepts named color, hex, rgb, and rgba
-         * style color values.
-         */
-        static fromString<T extends string>(
-            str: T,
-            obj?: Color
-        ): T extends keyof DojoJS.ColorNames ? Color : T extends InferHexColor<T> ? Color : Color | null;
-        /**
-         * Returns a new `Color` instance based on the provided value (brightness) of a grayscale color.
-         * @throws {Error} "dojo/colors" has not been loaded and is needed to use this function
-         */
-        static makeGrey(value: string | number, alpha: string | number): Color;
-    }
     type BaseColorNames = typeof _baseColorNames;
     global {
         namespace DojoJS {
@@ -8544,7 +8561,7 @@ declare module 'dojo/_base/Color' {
             interface ColorNames extends BaseColorNames {}
         }
     }
-    export = Color;
+    export = DojoJS.Color;
 }
 declare module 'dojo/_base/unload' {
     class Unload {
@@ -8628,19 +8645,19 @@ declare module 'dojo/dom-prop' {
          * Gets a property on an HTML element.
          * @throws {TypeError} if node is not resolved to an element
          */
-        get<T extends Element, U extends string>(node: T, name: U): U extends keyof T ? T[U] : undefined;
-        get(node: string | Element, name: 'textContent' | 'textcontent'): (string | '') | throws<TypeError>;
+        get<T extends Element, U extends string>(node: T | Node | string, name: U): U extends keyof T ? T[U] : undefined;
+        get(node: string | Element | Node, name: 'textContent' | 'textcontent'): (string | '') | throws<TypeError>;
         /**
          * Sets a property on an HTML element.
          * @throws {TypeError} if node is not resolved to an element
          */
-        set<T extends Element, U extends keyof T>(node: T, name: U, value: T[U]): T;
+        set<T extends Element, U extends keyof T>(node: T | Node | string, name: U, value: T[U]): T;
         set<
             T extends Element,
             U extends {
                 [K in keyof T]?: T[K];
             }
-        >(node: T, name: U): T;
+        >(node: T | Node | string, name: U): T;
     }
     const _default_13: Props;
     export = _default_13;
@@ -8654,18 +8671,18 @@ declare module 'dojo/dom-attr' {
          * Returns true if the requested attribute is specified on the given element, and false otherwise.
          * @throws {TypeError} if node is not resolved to an element
          */
-        has(node: Element | string, name: string): boolean | throws<TypeError>;
+        has(node: Element | string | Node, name: string): boolean | throws<TypeError>;
         /**
          * Gets the value of the named property from the provided element.
          * @throws {TypeError} if node is not resolved to an element
          */
-        get<T extends Element, U extends string>(node: T, name: U): U extends keyof T ? T[U] : unknown;
-        get(node: string | Element, name: 'textContent' | 'textcontent'): (string | '') | throws<TypeError>;
+        get<T extends Element, U extends string>(node: T | Node | string, name: U): U extends keyof T ? T[U] : unknown;
+        get(node: string | Element | Node, name: 'textContent' | 'textcontent'): (string | '') | throws<TypeError>;
         /**
          * Sets the value of a property on an HTML element.
          * @throws {TypeError} if node is not resolved to an element
          */
-        set<T extends Element, U extends keyof T>(node: T, name: U, value: T[U]): T;
+        set<T extends Element, U extends keyof T>(node: string | T | Node, name: string | U, value: T[U]): T;
         set<
             T extends Element,
             U extends {
@@ -9774,8 +9791,9 @@ declare module 'dojo/_base/fx' {
     interface AnimationCallback {
         (node: HTMLElement): void;
     }
+
     interface FadeArguments {
-        node: HTMLElement | string;
+        node: HTMLElement | string | Node;
         duration?: number;
         easing?: EasingFunction;
         start?: Function;
@@ -9787,8 +9805,13 @@ declare module 'dojo/_base/fx' {
     }
     interface AnimationArguments extends FadeArguments {
         properties?: AnimationArgumentsProperties;
-        onEnd?: AnimationCallback;
+        beforeBegin?: () => void;
+        onBegin?: AnimationCallback;
+        onPlay?: AnimationCallback;
         onAnimate?: AnimationCallback;
+        onPause?: AnimationCallback;
+        onEnd?: () => void;
+        onStop?: AnimationCallback;
     }
     global {
         namespace DojoJS {
@@ -9822,7 +9845,7 @@ declare module 'dojo/_base/fx' {
                  * immediately, unlike nearly every other Dojo animation API.
                  */
                 anim(
-                    node: HTMLElement | string,
+                    node: HTMLElement | string | Node,
                     properties: {
                         [name: string]: any;
                     },
@@ -10020,22 +10043,9 @@ declare module 'dojo/main' {
 }
 declare module 'dojo/_base/url' {
     var n: UrlConstructor;
-    interface Url {
-        uri: string;
-        scheme: string;
-        authority: string;
-        path: string;
-        query: string;
-        fragment: string;
-        user?: string;
-        password?: string;
-        host?: string;
-        port?: string;
-        toString(): string;
-    }
     interface UrlConstructor {
-        new (...args: any[]): Url;
-        prototype: Url;
+        new (...args: any[]): DojoJS.Url;
+        prototype: DojoJS.Url;
     }
     global {
         namespace DojoJS {
@@ -26701,3 +26711,3764 @@ declare module 'ebg/layer/nls/ly_studio_ROOT' {
     export = _default_45;
 }
 //# sourceMappingURL=all-bga-types.d.ts.map
+
+declare module 'dojox/gfx' {
+    import Color = require('dojo/_base/Color');
+
+    export const arc: Object;
+    /**
+     *
+     */
+    export const bezierutils: Object;
+    /**
+     * This the graphics rendering bridge for W3C Canvas compliant browsers.
+     * Since Canvas is an immediate mode graphics api, with no object graph or
+     * eventing capabilities, use of this module alone will only add in drawing support.
+     * The additional module, canvasWithEvents extends this module with additional support
+     * for handling events on Canvas.  By default, the support for events is now included
+     * however, if only drawing capabilities are needed, canvas event module can be disabled
+     * using the dojoConfig option, canvasEvents:true|false.
+     * The id of the Canvas renderer is 'canvas'.  This id can be used when switch Dojo's
+     * graphics context between renderer implementations.  See dojox/gfx/_base.switchRenderer
+     * API.
+     *
+     */
+    export const canvas: Object;
+    /**
+     *
+     */
+    export const canvas_attach: Object;
+    /**
+     *
+     */
+    export const canvasext: Object;
+    /**
+     * This the graphics rendering bridge for W3C Canvas compliant browsers which extends
+     * the basic canvas drawing renderer bridge to add additional support for graphics events
+     * on Shapes.
+     * Since Canvas is an immediate mode graphics api, with no object graph or
+     * eventing capabilities, use of the canvas module alone will only add in drawing support.
+     * This additional module, canvasWithEvents extends this module with additional support
+     * for handling events on Canvas.  By default, the support for events is now included
+     * however, if only drawing capabilities are needed, canvas event module can be disabled
+     * using the dojoConfig option, canvasEvents:true|false.
+     *
+     */
+    export const canvasWithEvents: Object;
+    /**
+     * points per centimeter (constant)
+     *
+     */
+    export const cm_in_pt: number;
+    /**
+     * An object specifying the default properties for a Font used in text operations.
+     *
+     */
+    export const defaultFont: Object;
+    /**
+     *
+     */
+    export const defaultVectorFont: Object;
+    /**
+     *
+     */
+    export const defaultVectorText: Object;
+    /**
+     * An object specifying the properties for a Font used in text operations.
+     *
+     */
+    export const Font: Object;
+    /**
+     *
+     */
+    export const fx: Object;
+    /**
+     *
+     */
+    export const getDefault: Object;
+    /**
+     *
+     */
+    export const gradient: Object;
+    /**
+     *
+     */
+    export const gradutils: Object;
+    /**
+     * points per millimeter (constant)
+     *
+     */
+    export const mm_in_pt: number;
+    /**
+     *
+     */
+    export const move: Object;
+    /**
+     *
+     */
+    export const pathSvgRegExp: RegExp;
+    /**
+     * a constant regular expression used to split a SVG/VML path into primitive components
+     *
+     */
+    export const pathVmlRegExp: RegExp;
+    /**
+     * Either the string name of a renderer (eg. 'canvas', 'svg, ...) or the renderer
+     * object to switch to.
+     *
+     */
+    export const renderer: string;
+    /**
+     * This the graphics rendering bridge for the Microsoft Silverlight plugin.
+     * Silverlight is a faster implementation on IE6-8 than the default 2d graphics, VML
+     *
+     */
+    export const silverlight: Object;
+    /**
+     *
+     */
+    export const silverlight_attach: Object;
+    /**
+     * This the graphics rendering bridge for browsers compliant with W3C SVG1.0.
+     * This is the preferred renderer to use for interactive and accessible graphics.
+     *
+     */
+    export const svg: Object;
+    /**
+     *
+     */
+    export const svgext: Object;
+    /**
+     *
+     */
+    export const utils: Object;
+    /**
+     *
+     */
+    export const vectorFontFitting: Object;
+    /**
+     * This the default graphics rendering bridge for IE6-7.
+     * This renderer is very slow.  For best performance on IE6-8, use Silverlight plugin.
+     * IE9+ defaults to the standard W3C SVG renderer.
+     *
+     */
+    export const vml: Object;
+    /**
+     * creates a surface
+     *
+     * @param parentNode a parent node
+     * @param width width of surface, e.g., "100px" or 100
+     * @param height height of surface, e.g., "100px" or 100
+     */
+    export function createSurface(parentNode: HTMLElement, width: String, height: String): Surface;
+    /**
+     * creates a surface
+     *
+     * @param parentNode a parent node
+     * @param width width of surface, e.g., "100px" or 100
+     * @param height height of surface, e.g., "100px" or 100
+     */
+    export function createSurface(parentNode: HTMLElement, width: number, height: String): Surface;
+    /**
+     * creates a surface
+     *
+     * @param parentNode a parent node
+     * @param width width of surface, e.g., "100px" or 100
+     * @param height height of surface, e.g., "100px" or 100
+     */
+    export function createSurface(parentNode: HTMLElement, width: String, height: number): Surface;
+    /**
+     * creates a surface
+     *
+     * @param parentNode a parent node
+     * @param width width of surface, e.g., "100px" or 100
+     * @param height height of surface, e.g., "100px" or 100
+     */
+    export function createSurface(parentNode: HTMLElement, width: number, height: number): Surface;
+    /**
+     * Decompose a 2D matrix into translation, scaling, and rotation components.
+     * This function decompose a matrix into four logical components:
+     * translation, rotation, scaling, and one more rotation using SVD.
+     * The components should be applied in following order:
+     *
+     * [translate, rotate(angle2), scale, rotate(angle1)]
+     *
+     * @param matrix a 2D matrix-like object
+     */
+    export function decompose(matrix: matrix.Matrix2D): void;
+    /**
+     * compares event sources, returns true if they are equal
+     *
+     * @param a
+     * @param b
+     */
+    export function equalSources(a: any, b: any): void;
+    /**
+     * converts a number to a string using a fixed notation
+     *
+     * @param x number to be converted
+     * @param addSpace whether to add a space before a positive number
+     */
+    export function formatNumber(x: number, addSpace: boolean): String;
+    /**
+     *
+     * @param url
+     */
+    export function getVectorFont(url: String): any;
+    /**
+     * converts a font object to a CSS font string
+     *
+     * @param font font object (see dojox/gfx.defaultFont)
+     */
+    export function makeFontString(font: Object): String;
+    /**
+     * copies the original object, and all copied properties from the
+     * 'update' object
+     *
+     * @param defaults the object to be cloned before updating
+     * @param update the object, which properties are to be cloned during updating
+     */
+    export function makeParameters(defaults: Object, update: Object): Object;
+    /**
+     * a 2D matrix object
+     * Normalizes a 2D matrix-like object. If arrays is passed,
+     * all objects of the array are normalized and multiplied sequentially.
+     *
+     * @param arg a 2D matrix-like object, a number, or an array of such objects
+     */
+    export function Matrix2D(arg: Object): void;
+    /**
+     *
+     */
+    export function Moveable(): void;
+    /**
+     *
+     */
+    export function Mover(): void;
+    /**
+     * converts any legal color representation to normalized
+     * dojo/Color object
+     *
+     * @param color A color representation.
+     */
+    export function normalizeColor(color: Color): any;
+    /**
+     * converts any legal color representation to normalized
+     * dojo/Color object
+     *
+     * @param color A color representation.
+     */
+    export function normalizeColor(color: any[]): any;
+    /**
+     * converts any legal color representation to normalized
+     * dojo/Color object
+     *
+     * @param color A color representation.
+     */
+    export function normalizeColor(color: String): any;
+    /**
+     * converts any legal color representation to normalized
+     * dojo/Color object
+     *
+     * @param color A color representation.
+     */
+    export function normalizeColor(color: Object): any;
+    /**
+     * converts any length value to pixels
+     *
+     * @param len a length, e.g., '12pc'
+     */
+    export function normalizedLength(len: String): number;
+    /**
+     * updates an existing object with properties from an 'update'
+     * object
+     *
+     * @param existed the target object to be updated
+     * @param update the 'update' object, whose properties will be used to updatethe existed object
+     */
+    export function normalizeParameters(existed: Object, update: Object): Object;
+    /**
+     * converts points to pixels
+     *
+     * @param len a value in points
+     */
+    export function pt2px(len: number): number;
+    /**
+     * converts pixels to points
+     *
+     * @param len a value in pixels
+     */
+    export function px2pt(len: number): number;
+    /**
+     * returns the current number of pixels per point.
+     *
+     */
+    export function px_in_pt(): number;
+    /**
+     * converts a CSS font string to a font object
+     * Converts a CSS font string to a gfx font object. The CSS font
+     * string components should follow the W3C specified order
+     * (see http://www.w3.org/TR/CSS2/fonts.html#font-shorthand):
+     * style, variant, weight, size, optional line height (will be
+     * ignored), and family. Note that the Font.size attribute is limited to numeric CSS length.
+     *
+     * @param str a CSS font string.
+     */
+    export function splitFontString(str: String): Object;
+    /**
+     * switch the graphics implementation to the specified renderer.
+     *
+     * @param renderer Either the string name of a renderer (eg. 'canvas', 'svg, ...) or the rendererobject to switch to.
+     */
+    export function switchTo(renderer: String): void;
+    /**
+     * switch the graphics implementation to the specified renderer.
+     *
+     * @param renderer Either the string name of a renderer (eg. 'canvas', 'svg, ...) or the rendererobject to switch to.
+     */
+    export function switchTo(renderer: Object): void;
+    /**
+     *
+     */
+    export function VectorFont(): void;
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.__MoveableCtorArgs.html
+     *
+     * The arguments used for dojox/gfx/Moveable constructor.
+     *
+     */
+    export class __MoveableCtorArgs {
+        constructor();
+        /**
+         * delay move by this number of pixels
+         *
+         */
+        'delay': number;
+        /**
+         * a constructor of custom Mover
+         *
+         */
+        mover(): void;
+    }
+    interface defaultShape {
+        /**
+         * Specifies the type of this shape
+         *
+         */
+        type: string;
+    }
+    export interface defaultCircle extends defaultShape {
+        /**
+         * Specifies this shape is a circle, value 'circle'.
+         *
+         */
+        type: 'circle';
+        cx?: number;
+        cy?: number;
+        r?: number;
+    }
+    export interface defaultEllipse extends defaultShape {
+        /**
+         * Specifies this shape is an ellipse, value 'ellipse'.
+         *
+         */
+        type: 'ellipse';
+        cx?: number;
+        cy?: number;
+        rx?: number;
+        ry?: number;
+    }
+    export interface defaultLine extends defaultShape {
+        /**
+         * Specifies this shape is a line, value 'line'.
+         *
+         */
+        type: 'line';
+        x1?: number;
+        y1?: number;
+        x2?: number;
+        y2?: number;
+    }
+    export interface defaultImage extends defaultShape {
+        /**
+         * Specifies this shape is an image, value 'image'.
+         *
+         */
+        type: 'image';
+        /**
+         * The X coordinate of the image's position, default value 0.
+         *
+         */
+        x?: number;
+        /**
+         * The Y coordinate of the image's position, default value 0.
+         *
+         */
+        y?: number;
+        /**
+         * The width of the image, default value 0.
+         *
+         */
+        width?: number;
+        /**
+         * The height of the image, default value 0.
+         *
+         */
+        height?: number;
+        /**
+         * The src url of the image, defaults to empty string.
+         *
+         */
+        src?: string;
+    }
+    export interface defaultPath extends defaultShape {
+        /**
+         * Specifies this shape is a path, value 'path'.
+         *
+         */
+        type: 'path';
+        path?: string;
+    }
+    export interface defaultPolyline extends defaultShape {
+        /**
+         * Specifies this shape is a polyline, value 'polyline'.
+         *
+         */
+        type: 'polyline';
+        points?: {x: number; y: number}[];
+    }
+    export interface defaultRect extends defaultShape {
+        /**
+         * Specifies this shape is a rectangle, value 'rect'.
+         *
+         */
+        type: 'rect';
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+        radius?: number;
+    }
+    export interface defaultText extends defaultShape {
+        /**
+         * Specifies this shape is text, value 'text'.
+         *
+         */
+        type: 'text';
+        /**
+         * The X coordinate of the text position, default value 0.
+         *
+         */
+        x?: number;
+        /**
+         * The Y coordinate of the text position, default value 0.
+         *
+         */
+        y?: number;
+        /**
+         * The text to be displayed, default value empty string.
+         *
+         */
+        text?: string;
+        /**
+         * The horizontal text alignment, one of 'start', 'end', 'center'. Default value 'start'.
+         *
+         */
+        align?: 'start' | 'middle' | 'end';
+        /**
+         * The text decoration, one of 'none', 'underline', 'overline', 'line-through'. Default value 'none'.
+         *
+         */
+        decoration?: 'none' | 'underline' | 'overline' | 'line-through';
+        /**
+         * Whether the text is rotated, boolean default value false.
+         *
+         */
+        rotated?: boolean;
+        /**
+         * Whether kerning is used on the text, boolean default value true.
+         *
+         */
+        kerning?: boolean;
+    }
+    export interface defaultTextPath extends defaultShape {
+        /**
+         * Specifies this is a TextPath, value 'textpath'.
+         *
+         */
+        type: 'textpath';
+        /**
+         * The X coordinate of the text position, default value 0.
+         *
+         */
+        x?: number;
+        /**
+         * The Y coordinate of the text position, default value 0.
+         *
+         */
+        y?: number;
+        /**
+         * The text to be displayed, default value empty string.
+         *
+         */
+        text?: string;
+        /**
+         * The horizontal text alignment, one of 'start', 'end', 'center'. Default value 'start'.
+         *
+         */
+        align?: 'start' | 'middle' | 'end';
+        /**
+         * The text decoration, one of 'none', 'underline', 'overline', 'line-through'. Default value 'none'.
+         *
+         */
+        decoration?: 'none' | 'underline' | 'overline' | 'line-through';
+        /**
+         * Whether the text is rotated, boolean default value false.
+         *
+         */
+        rotated?: boolean;
+        /**
+         * Whether kerning is used on the text, boolean default value true.
+         *
+         */
+        kerning?: boolean;
+    }
+    export class Shape<TShape extends defaultShape = defaultShape> {
+        shape: Required<TShape>;
+
+        constructor(rawNode: HTMLElement);
+        /**
+         * multiplies the existing matrix with an argument on left side
+         * (matrix * this.matrix)
+         *
+         * @param matrix a matrix or a matrix-like object(see an argument of dojox/gfx/matrix.Matrix2Dconstructor for a list of acceptable arguments)
+         */
+        applyLeftTransform(matrix: matrix.Matrix2D): Function;
+        /**
+         * multiplies the existing matrix with an argument on right side
+         * (this.matrix * matrix)
+         *
+         * @param matrix a matrix or a matrix-like object(see an argument of dojox/gfx/matrix.Matrix2Dconstructor for a list of acceptable arguments)
+         */
+        applyRightTransform(matrix: matrix.Matrix2D): Function;
+        /**
+         * a shortcut for dojox/gfx/shape.Shape.applyRightTransform
+         *
+         * @param matrix a matrix or a matrix-like object(see an argument of dojox/gfx/matrix.Matrix2Dconstructor for a list of acceptable arguments)
+         */
+        applyTransform(matrix: matrix.Matrix2D): Function;
+        /**
+         * connects a handler to an event on this shape
+         *
+         * @param name
+         * @param object
+         * @param method
+         */
+        connect(name: any, object: any, method: any): any;
+        /**
+         * Releases all internal resources owned by this shape. Once this method has been called,
+         * the instance is considered destroyed and should not be used anymore.
+         *
+         */
+        destroy(): void;
+        /**
+         * connects a handler by token from an event on this shape
+         *
+         * @param token
+         */
+        disconnect(token: any): any;
+        /**
+         * returns the bounding box
+         *
+         */
+        getBoundingBox(): Object;
+        /**
+         *
+         */
+        getClip<T extends Shape>(): T | null;
+        /**
+         * returns a Node, which is used as
+         * a source of events for this shape
+         *
+         */
+        getEventSource(): any;
+        /**
+         * Returns the current fill object or null
+         * (see dojox/gfx.defaultLinearGradient,
+         * dojox/gfx.defaultRadialGradient,
+         * dojox/gfx.defaultPattern,
+         * or dojo/Color)
+         *
+         */
+        getFill(): Fill | null;
+        /**
+         * Different graphics rendering subsystems implement shapes in different ways.  This
+         * method provides access to the underlying graphics subsystem object.  Clients calling this
+         * method and using the return value must be careful not to try sharing or using the underlying node
+         * in a general way across renderer implementation.
+         * Returns the underlying graphics Node, or null if no underlying graphics node is used by this shape.
+         *
+         */
+        getNode(): any;
+        /**
+         * Returns the parent Shape, Group or null if this Shape is unparented.
+         * (see dojox/gfx/shape.Surface,
+         * or dojox/gfx.Group)
+         *
+         */
+        getParent(): Shape | null;
+        /**
+         * returns the current Shape object or null
+         * (see dojox/gfx.defaultPath,
+         * dojox/gfx.defaultPolyline,
+         * dojox/gfx.defaultRect,
+         * dojox/gfx.defaultEllipse,
+         * dojox/gfx.defaultCircle,
+         * dojox/gfx.defaultLine,
+         * or dojox/gfx.defaultImage)
+         *
+         */
+        getShape(): Shape<TShape>;
+        /**
+         * Returns the current stroke object or null
+         * (see dojox/gfx.defaultStroke)
+         *
+         */
+        getStroke(): Stroke | null;
+        /**
+         * Returns the current transformation matrix applied to this Shape or null
+         *
+         */
+        getTransform(): any;
+        /**
+         * returns an array of four points or null
+         * four points represent four corners of the untransformed bounding box
+         *
+         */
+        getTransformedBoundingBox(): any;
+        /**
+         * moves a shape to back of its parent's list of shapes
+         *
+         */
+        moveToBack(): Function;
+        /**
+         * moves a shape to front of its parent's list of shapes
+         *
+         */
+        moveToFront(): Function;
+        /**
+         * Connects an event to this shape.
+         *
+         * @param type
+         * @param listener
+         */
+        on(type: any, listener: any): any;
+        /**
+         * removes the shape from its parent's list of shapes
+         *
+         * @param silently if true, do not redraw a picture yet
+         */
+        removeShape(silently: boolean): Function;
+        /**
+         * sets the clipping area of this shape.
+         * The clipping area defines the shape area that will be effectively visible. Everything that
+         * would be drawn outside of the clipping area will not be rendered.
+         * The possible clipping area types are rectangle, ellipse, polyline and path, but all are not
+         * supported by all the renderers. vml only supports rectangle clipping, while the gfx silverlight renderer does not
+         * support path clipping.
+         * The clip parameter defines the clipping area geometry, and should be an object with the following properties:
+         *
+         * {x:Number, y:Number, width:Number, height:Number} for rectangular clip
+         * {cx:Number, cy:Number, rx:Number, ry:Number} for ellipse clip
+         * {points:Array} for polyline clip
+         * {d:String} for a path clip.
+         * The clip geometry coordinates are expressed in the coordinate system used to draw the shape. In other
+         * words, the clipping area is defined in the shape parent coordinate system and the shape transform is automatically applied.
+         *
+         * @param clip
+         */
+        setClip<T extends defaultShape>(clip: T): Shape<TShape>;
+        /**
+         * sets a fill object
+         * (the default implementation simply ignores it)
+         *
+         * @param fill a fill object(see dojox/gfx.defaultLinearGradient,dojox/gfx.defaultRadialGradient,dojox/gfx.defaultPattern,or dojo/_base/Color)
+         */
+        setFill(fill: string | Color | defaultFill | defaultPattern | defaultLinearGradient | defaultRadialGradient): Shape<TShape>;
+        /**
+         * sets a shape object
+         * (the default implementation simply ignores it)
+         *
+         * @param shape a shape object(see dojox/gfx.defaultPath,dojox/gfx.defaultPolyline,dojox/gfx.defaultRect,dojox/gfx.defaultEllipse,dojox/gfx.defaultCircle,dojox/gfx.defaultLine,or dojox/gfx.defaultImage)
+         */
+        setShape(shape: Omit<TShape, keyof defaultShape>): Shape<TShape>;
+        /**
+         * sets a stroke object
+         * (the default implementation simply ignores it)
+         *
+         * @param stroke a stroke object(see dojox/gfx.defaultStroke)
+         */
+        setStroke(stroke: Omit<defaultStroke, 'type'>): Shape<TShape>;
+        /**
+         * sets a transformation matrix
+         *
+         * @param matrix a matrix or a matrix-like object(see an argument of dojox/gfx/matrix.Matrix2Dconstructor for a list of acceptable arguments)
+         */
+        setTransform(matrix: matrix.Matrix2D | null): Shape<TShape>;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Circle.html
+     *
+     * a generic circle
+     *
+     * @param rawNode a DOM Node
+     */
+    export class Circle extends Shape<defaultCircle> {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Ellipse.html
+     *
+     * a generic ellipse
+     *
+     * @param rawNode a DOM Node
+     */
+    export class Ellipse extends Shape<defaultEllipse> {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Line.html
+     *
+     * a generic line (do not instantiate it directly)
+     *
+     * @param rawNode a DOM Node
+     */
+    export class Line extends Shape<defaultLine> {}
+    /**
+     * a generic image
+     *
+     * @param rawNode a DOM Node
+     */
+    export class Image extends Shape<defaultImage> {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Path.html
+     *
+     * a generalized path shape
+     *
+     * @param rawNode a DOM Node
+     */
+    export class Path<T extends defaultPath = defaultPath> extends Shape<T> {
+        /**
+         * forms a move segment
+         *
+         */
+        moveTo(x: number, y: number): Path;
+        /**
+         * forms a line segment
+         *
+         */
+        lineTo(x: number, y: number): Path;
+        /**
+         * forms a horizontal line segment
+         *
+         */
+        hLineTo(x: number): Path;
+        /**
+         * forms a vertical line segment
+         *
+         */
+        vLineTo(y: number): Path;
+        /**
+         * forms a curve segment
+         *
+         */
+        curveTo(x1: number, y1: number, x2: number, y2: number, x: number, y: number): Path;
+        /**
+         * forms a smooth curve segment
+         *
+         */
+        smoothCurveTo(x2: number, y2: number, x: number, y: number): Path;
+        /**
+         * forms a quadratic curve segment
+         *
+         */
+        qCurveTo(x1: number, y1: number, x: number, y: number): Path;
+        /**
+         * forms a quadratic smooth curve segment
+         *
+         */
+        qSmoothCurveTo(x: number, y: number): Path;
+        /**
+         * forms an elliptic arc segment
+         *
+         */
+        arcTo(rx: number, ry: number, x_axis_rotation: number, large_arc_flag: boolean, sweep_flag: boolean, x: number, y: number): Path;
+        /**
+         * closes a path
+         *
+         */
+        closePath(): Path;
+        /**
+         * sets an absolute or relative mode for path points
+         *
+         * @param mode true/false or "absolute"/"relative" to specify the mode
+         */
+        setAbsoluteMode(mode: boolean): void;
+        /**
+         * returns a current value of the absolute mode
+         *
+         */
+        getAbsoluteMode(): boolean;
+        /**
+         * returns the last point in the path, or null
+         *
+         */
+        getLastPosition(): {x: number; y: number};
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Group.html
+     *
+     * a group shape, which can be used
+     * to logically group shapes (e.g, to propagate matricies)
+     *
+     */
+    export class Group extends Shape {
+        constructor();
+        /**
+         * Will be used for inheritance, or as default for text objects
+         * that textDir wasn't directly specified for them but the bidi support was required.
+         *
+         */
+        'textDir': string;
+        /**
+         *
+         */
+        'children': Shape[];
+        /**
+         * adds a shape to the list
+         *
+         * @param shape the shape to add to the list
+         */
+        add(shape: Shape): any;
+        /**
+         * removes all shapes from a group/surface.
+         *
+         * @param destroy               OptionalIndicates whether the children should be destroyed. Optional.
+         */
+        clear(destroy: boolean): Function;
+        /**
+         * submits the current batch, append all pending child shapes to DOM
+         * On canvas, this method flushes the pending redraws queue.
+         *
+         */
+        closeBatch(): Function;
+        /**
+         * creates a circle shape
+         *
+         * @param circle a circle object (see dojox/gfx.defaultCircle)
+         */
+        createCircle(circle: Omit<defaultCircle, keyof defaultShape>): Circle;
+        /**
+         * creates an ellipse shape
+         *
+         * @param ellipse an ellipse object (see dojox/gfx.defaultEllipse)
+         */
+        createEllipse(ellipse: Omit<defaultEllipse, keyof defaultShape>): Ellipse;
+        /**
+         * creates a group shape
+         *
+         */
+        createGroup(): Group;
+        /**
+         * creates a image shape
+         *
+         * @param image an image object (see dojox/gfx.defaultImage)
+         */
+        createImage(image: Omit<defaultImage, keyof defaultShape>): Image;
+        /**
+         * creates a line shape
+         *
+         * @param line a line object (see dojox/gfx.defaultLine)
+         */
+        createLine(line: Omit<defaultLine, keyof defaultShape>): Line;
+        /**
+         * creates an instance of the passed shapeType class
+         *
+         * @param shapeType a class constructor to create an instance of
+         * @param rawShape properties to be passed in to the classes 'setShape' method
+         */
+        createObject(shapeType: Function, rawShape: defaultShape): Shape<typeof rawShape>;
+        /**
+         * creates a path shape
+         *
+         * @param path a path object (see dojox/gfx.defaultPath)
+         */
+        createPath(path: Omit<defaultPath, keyof defaultShape>): Path;
+        /**
+         * creates a polyline/polygon shape
+         *
+         * @param points a points object (see dojox/gfx.defaultPolyline)or an Array of points
+         */
+        createPolyline(points: Omit<defaultPolyline, keyof defaultShape>): Polyline;
+        /**
+         * creates a rectangle shape
+         *
+         * @param rect a path object (see dojox/gfx.defaultRect)
+         */
+        createRect(rect: Omit<defaultRect, keyof defaultShape>): Rect;
+        /**
+         * creates a shape object based on its type; it is meant to be used
+         * by group-like objects
+         *
+         * @param shape a shape descriptor object
+         */
+        createShape(shape: defaultShape): Shape<typeof shape>;
+        /**
+         * creates a text shape
+         *
+         * @param text a text object (see dojox/gfx.defaultText)
+         */
+        createText(text: Omit<defaultText, keyof defaultShape>): Text;
+        /**
+         * creates a text shape
+         *
+         * @param text a textpath object (see dojox/gfx.defaultTextPath)
+         */
+        createTextPath(text: Omit<defaultTextPath, keyof defaultShape>): TextPath;
+        /**
+         * starts a new batch, subsequent new child shapes will be held in
+         * the batch instead of appending to the container directly.
+         * Because the canvas renderer has no DOM hierarchy, the canvas implementation differs
+         * such that it suspends the repaint requests for this container until the current batch is closed by a call to closeBatch().
+         *
+         */
+        openBatch(): Function;
+        /**
+         * removes a shape from the list
+         *
+         * @param shape the shape to remove
+         * @param silently if true, do not redraw a picture yet
+         */
+        remove(shape: Shape, silently: boolean): Function;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/Moveable.html
+     *
+     *
+     * @param shape a shape object to be moved.
+     * @param params an optional configuration object.
+     */
+    export class Moveable {
+        constructor(shape: Shape, params: Object);
+        /**
+         * stops watching for possible move, deletes all references, so the object can be garbage-collected
+         *
+         */
+        destroy(): void;
+        /**
+         * called during the very first move notification,
+         * can be used to initialize coordinates, can be overwritten.
+         *
+         * @param mover A Mover instance that fired the event.
+         */
+        onFirstMove(mover: Mover): void;
+        /**
+         * event processor for onmousedown, creates a Mover for the shape
+         *
+         * @param e mouse event
+         */
+        onMouseDown(e: Event): void;
+        /**
+         * event processor for onmousemove, used only for delayed drags
+         *
+         * @param e mouse event
+         */
+        onMouseMove(e: Event): void;
+        /**
+         * event processor for onmouseup, used only for delayed delayed drags
+         *
+         * @param e mouse event
+         */
+        onMouseUp(e: Event): void;
+        /**
+         * called during every move notification,
+         * should actually move the node, can be overwritten.
+         *
+         * @param mover A Mover instance that fired the event.
+         * @param shift An object as {dx,dy} that represents the shift.
+         */
+        onMove(mover: Mover, shift: Object): void;
+        /**
+         * called after every incremental move,
+         * can be overwritten.
+         *
+         * @param mover A Mover instance that fired the event.
+         * @param shift An object as {dx,dy} that represents the shift.
+         */
+        onMoved(mover: Mover, shift: Object): void;
+        /**
+         * called before every move operation
+         *
+         * @param mover A Mover instance that fired the event.
+         */
+        onMoveStart(mover: Mover): void;
+        /**
+         * called after every move operation
+         *
+         * @param mover A Mover instance that fired the event.
+         */
+        onMoveStop(mover: Mover): void;
+        /**
+         * called before every incremental move,
+         * can be overwritten.
+         *
+         * @param mover A Mover instance that fired the event.
+         * @param shift An object as {dx,dy} that represents the shift.
+         */
+        onMoving(mover: Mover, shift: Object): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/path.html
+     *
+     * This module contains the core graphics Path API.
+     * Path command format follows the W3C SVG 1.0 Path api.
+     *
+     */
+    export class path {
+        constructor();
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/Mover.html
+     *
+     *
+     * @param shape a shape object to be moved
+     * @param e a mouse event, which started the move;only clientX and clientY properties are used
+     * @param host       Optionalobject which implements the functionality of the move, and defines proper events (onMoveStart and onMoveStop)
+     */
+    export class Mover {
+        constructor(shape: Shape, e: Event, host?: Object);
+        /**
+         * stops the move, deletes all references, so the object can be garbage-collected
+         *
+         */
+        destroy(): void;
+        /**
+         * it is meant to be called only once
+         *
+         */
+        onFirstMove(): void;
+        /**
+         * event processor for onmousemove
+         *
+         * @param e mouse event
+         */
+        onMouseMove(e: Event): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Point.html
+     *
+     * 2D point for drawings - {x, y}
+     * Do not use this object directly!
+     * Use the naked object instead: {x: 1, y: 2}.
+     *
+     */
+    export class Point {
+        constructor();
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Polyline.html
+     *
+     * a generic polyline/polygon (do not instantiate it directly)
+     *
+     * @param rawNode a DOM Node
+     */
+    export class Polyline extends Shape<defaultPolyline> {
+        setShape(shape: Omit<defaultPolyline, keyof defaultShape>, closed?: boolean): Polyline;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Rectangle.html
+     *
+     * rectangle - {x, y, width, height}
+     * Do not use this object directly!
+     * Use the naked object instead: {x: 1, y: 2, width: 100, height: 200}.
+     *
+     */
+    export class Rect extends Shape<defaultRect> {}
+    export class Rectangle extends Rect {}
+    /**
+     * 
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Surface.html
+     *
+     * a surface object to be used for drawings
+     *
+     */
+    export class Surface {
+        constructor();
+        /**
+         *
+         */
+        'isLoaded': boolean;
+        /**
+         * Will be used as default for Text/TextPath/Group objects that created by this surface
+         * and textDir wasn't directly specified for them, though the bidi support was loaded.
+         * Can be set in two ways:
+         *
+         * When the surface is created and textDir value passed to it as fourth
+         * parameter.
+         * Using the setTextDir(String) function, when this function is used the value
+         * of textDir propagates to all of it's children and the children of children (for Groups) etc.
+         *
+         */
+        'textDir': string;
+        /**
+         *
+         */
+        'children': Shape<{type: string}>[];
+        /**
+         * adds a shape to the list
+         *
+         * @param shape the shape to add to the list
+         */
+        add(shape: Shape): any;
+        /**
+         * removes all shapes from a group/surface.
+         *
+         * @param destroy               OptionalIndicates whether the children should be destroyed. Optional.
+         */
+        clear(destroy: boolean): Function;
+        /**
+         * submits the current batch, append all pending child shapes to DOM
+         * On canvas, this method flushes the pending redraws queue.
+         *
+         */
+        closeBatch(): Function;
+        /**
+         * connects a handler to an event on this shape
+         *
+         * @param name
+         * @param object
+         * @param method
+         */
+        connect(name: any, object: any, method: any): any;
+        /**
+         * creates a circle shape
+         *
+         * @param circle a circle object (see dojox/gfx.defaultCircle)
+         */
+        createCircle(circle: Omit<defaultCircle, keyof defaultShape>): Circle;
+        /**
+         * creates an ellipse shape
+         *
+         * @param ellipse an ellipse object (see dojox/gfx.defaultEllipse)
+         */
+        createEllipse(ellipse: Omit<defaultEllipse, keyof defaultShape>): Ellipse;
+        /**
+         * creates a group shape
+         *
+         */
+        createGroup(): any;
+        /**
+         * creates a image shape
+         *
+         * @param image an image object (see dojox/gfx.defaultImage)
+         */
+        createImage(image: Omit<defaultImage, keyof defaultShape>): Image;
+        /**
+         * creates a line shape
+         *
+         * @param line a line object (see dojox/gfx.defaultLine)
+         */
+        createLine(line: Omit<defaultLine, keyof defaultShape>): Line;
+        /**
+         * creates an instance of the passed shapeType class
+         *
+         * @param shapeType a class constructor to create an instance of
+         * @param rawShape properties to be passed in to the classes 'setShape' method
+         */
+        createObject(shapeType: Function, rawShape: defaultShape): Shape<typeof rawShape>;
+        /**
+         * creates a path shape
+         *
+         * @param path a path object (see dojox/gfx.defaultPath)
+         */
+        createPath(path: Omit<defaultPath, keyof defaultShape>): Path;
+        /**
+         * creates a polyline/polygon shape
+         *
+         * @param points a points object (see dojox/gfx.defaultPolyline)or an Array of points
+         */
+        createPolyline(points: Omit<defaultPolyline, keyof defaultShape>, closed?: boolean): Polyline;
+        /**
+         * creates a rectangle shape
+         *
+         * @param rect a path object (see dojox/gfx.defaultRect)
+         */
+        createRect(rect: Omit<defaultRect, keyof defaultShape>): Rect;
+        /**
+         * creates a shape object based on its type; it is meant to be used
+         * by group-like objects
+         *
+         * @param shape a shape descriptor object
+         */
+        createShape(shape: defaultShape): Shape<typeof shape>;
+        /**
+         * creates a text shape
+         *
+         * @param text a text object (see dojox/gfx.defaultText)
+         */
+        createText(text: Omit<defaultText, keyof defaultShape>): Text;
+        /**
+         * creates a text shape
+         *
+         * @param text a textpath object (see dojox/gfx.defaultTextPath)
+         */
+        createTextPath(text: Omit<defaultTextPath, keyof defaultShape>): TextPath;
+        /**
+         *
+         */
+        createViewport(): any;
+        /**
+         * destroy all relevant external resources and release all
+         * external references to make this object garbage-collectible
+         *
+         */
+        destroy(): void;
+        /**
+         * connects a handler by token from an event on this shape
+         *
+         * @param token
+         */
+        disconnect(token: any): any;
+        /**
+         * Returns the bounding box Rectangle for this shape.
+         *
+         */
+        getBoundingBox(): any;
+        /**
+         * gets current width and height in pixels
+         *
+         */
+        getDimensions(): Object;
+        /**
+         * returns a node, which can be used to attach event listeners
+         *
+         */
+        getEventSource(): any;
+        /**
+         *
+         */
+        getTextDir(): any;
+        /**
+         * Connects an event to this shape.
+         *
+         * @param type
+         * @param listener
+         */
+        on(type: any, listener: any): any;
+        /**
+         * starts a new batch, subsequent new child shapes will be held in
+         * the batch instead of appending to the container directly.
+         * Because the canvas renderer has no DOM hierarchy, the canvas implementation differs
+         * such that it suspends the repaint requests for this container until the current batch is closed by a call to closeBatch().
+         *
+         */
+        openBatch(): Function;
+        /**
+         * removes a shape from the list
+         *
+         * @param shape the shape to remove
+         * @param silently if true, do not redraw a picture yet
+         */
+        remove(shape: Shape, silently: boolean): Function;
+        /**
+         * sets the width and height of the rawNode
+         *
+         * @param width width of surface, e.g., "100px" or 100
+         * @param height height of surface, e.g., "100px" or 100
+         */
+        setDimensions(width: String | number, height: String | number): Function;
+        /**
+         * Used for propagation and change of textDir.
+         * newTextDir will be forced as textDir for all of it's children (Group/Text/TextPath).
+         *
+         * @param newTextDir
+         */
+        setTextDir(newTextDir: String): void;
+        /**
+         *
+         * @param context
+         * @param method
+         */
+        whenLoaded(context: Object, method: Function): void;
+        /**
+         *
+         * @param context
+         * @param method
+         */
+        whenLoaded(context: any, method: Function): void;
+        /**
+         *
+         * @param context
+         * @param method
+         */
+        whenLoaded(context: Object, method: String): void;
+        /**
+         *
+         * @param context
+         * @param method
+         */
+        whenLoaded(context: any, method: String): void;
+        /**
+         * local event, fired once when the surface is created
+         * asynchronously, used only when isLoaded is false, required
+         * only for Silverlight.
+         *
+         * @param surface
+         */
+        onLoad(surface: Surface): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Text.html
+     *
+     * a generic text (do not instantiate it directly)
+     *
+     * @param rawNode a DOM Node
+     */
+    export class Text extends Shape<defaultText> {
+        /**
+         * Applies the right transform on text, according to renderer.
+         * Finds the right transformation that should be applied on the text, according to renderer.
+         *
+         * @param text the string for manipulation, by default return value.
+         * @param textDir Text direction.Can be:"ltr" - for left to right layout."rtl" - for right to left layout"auto" - for contextual layout: the first strong letter decides the direction.
+         */
+        formatText(text: string, textDir: 'ltr' | 'rtl' | 'auto'): Text;
+        /**
+         * returns the current font object or null
+         *
+         */
+        getFont(): Font | null;
+        /**
+         * sets a font for text
+         *
+         * @param newFont a font object (see dojox/gfx.defaultFont) or a font string
+         */
+        setFont(newFont: Font): Text;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.TextPath.html
+     *
+     * a generalized TextPath shape
+     *
+     * @param rawNode a DOM node to be used by this TextPath object
+     */
+    export class TextPath extends Shape<defaultTextPath> {
+        /**
+         * returns the current text object or null
+         *
+         */
+        getText(): Text;
+        /**
+         * sets a text to be drawn along the path
+         *
+         * @param newText
+         */
+        setText(newText: Text): Function;
+        /**
+         * Applies the right transform on text, according to renderer.
+         * Finds the right transformation that should be applied on the text, according to renderer.
+         *
+         * @param text the string for manipulation, by default return value.
+         * @param textDir Text direction.Can be:"ltr" - for left to right layout."rtl" - for right to left layout"auto" - for contextual layout: the first strong letter decides the direction.
+         */
+        formatText(text: string, textDir: 'ltr' | 'rtl' | 'auto'): Text;
+        /**
+         * returns the current font object or null
+         *
+         */
+        getFont(): Font | null;
+        /**
+         * sets a font for text
+         *
+         * @param newFont a font object (see dojox/gfx.defaultFont) or a font string
+         */
+        setFont(newFont: Font): Text;
+        /**
+         * forms a move segment
+         *
+         */
+        moveTo(x: number, y: number): Path;
+        /**
+         * forms a line segment
+         *
+         */
+        lineTo(x: number, y: number): Path;
+        /**
+         * forms a horizontal line segment
+         *
+         */
+        hLineTo(x: number): Path;
+        /**
+         * forms a vertical line segment
+         *
+         */
+        vLineTo(y: number): Path;
+        /**
+         * forms a curve segment
+         *
+         */
+        curveTo(x1: number, y1: number, x2: number, y2: number, x: number, y: number): Path;
+        /**
+         * forms a smooth curve segment
+         *
+         */
+        smoothCurveTo(x2: number, y2: number, x: number, y: number): Path;
+        /**
+         * forms a quadratic curve segment
+         *
+         */
+        qCurveTo(x1: number, y1: number, x: number, y: number): Path;
+        /**
+         * forms a quadratic smooth curve segment
+         *
+         */
+        qSmoothCurveTo(x: number, y: number): Path;
+        /**
+         * forms an elliptic arc segment
+         *
+         */
+        arcTo(rx: number, ry: number, x_axis_rotation: number, large_arc_flag: boolean, sweep_flag: boolean, x: number, y: number): Path;
+        /**
+         * closes a path
+         *
+         */
+        closePath(): Path;
+        /**
+         * sets an absolute or relative mode for path points
+         *
+         * @param mode true/false or "absolute"/"relative" to specify the mode
+         */
+        setAbsoluteMode(mode: boolean): void;
+        /**
+         * returns a current value of the absolute mode
+         *
+         */
+        getAbsoluteMode(): boolean;
+        /**
+         * returns the last point in the path, or null
+         *
+         */
+        getLastPosition(): {x: number; y: number};
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.VectorFont.html
+     *
+     * An implementation of the SVG Font 1.1 spec, using dojox/gfx.
+     *
+     * Basic interface:
+     *
+     * var f = new gfx.Font(url|string);
+     * surface||group.createVectorText(text)
+     * .setFill(fill)
+     * .setStroke(stroke)
+     * .setFont(fontStyleObject);
+     * The arguments passed to createVectorText are the same as you would
+     * pass to surface||group.createText; the difference is that this
+     * is entirely renderer-agnostic, and the return value is a subclass
+     * of dojox/gfx.Group.
+     *
+     * Note also that the "defaultText" object is slightly different:
+     * { type:"vectortext", x:0, y:0, width:null, height: null,
+     * text: "", align: "start", decoration: "none" }
+     *
+     * ...as well as the "defaultVectorFont" object:
+     * { type:"vectorfont", size:"10pt" }
+     *
+     * The reason for this should be obvious: most of the style for the font is defined
+     * by the font object itself.
+     *
+     * Note that this will only render IF and WHEN you set the font.
+     *
+     * @param url An url pointing to the SVG Font definition.
+     */
+    export class VectorFont {
+        constructor(url: String);
+        /**
+         * based on the passed parameters, draw the given text using paths
+         * defined by this font.
+         * The main method of a VectorFont, draw() will take a text fragment
+         * and render it in a set of groups and paths based on the parameters
+         * passed.
+         *
+         * The basics of drawing text are simple enough: pass it your text as
+         * part of the textArgs object, pass size and family info as part of
+         * the fontArgs object, pass at least a color as the fillArgs object,
+         * and if you are looking to create an outline, pass the strokeArgs
+         * object as well. fillArgs and strokeArgs are the same as any other
+         * gfx fill and stroke arguments; they are simply applied to any path
+         * object generated by this method.
+         *
+         * Resulting GFX structure
+         * The result of this function is a set of gfx objects in the following structure:
+         *
+         * gfx.Group           //      the parent group generated by this function
+         * +   gfx.Group[]     //      a group generated for each line of text
+         *     +   gfx.Path[]  //      each glyph/character in the text
+         * Scaling transformations (i.e. making the generated text the correct size)
+         * are always applied to the parent Group that is generated (i.e. the top
+         * node in the above example).  In theory, if you are looking to do any kind
+         * of other transformations (such as a translation), you should apply it to
+         * the group reference you pass to this method.  If you find that you need
+         * to apply transformations to the group that is returned by this method,
+         * you will need to reapply the scaling transformation as the last transform,
+         * like so:
+         *
+         * textGroup.setTransform(new matrix.Matrix2D([
+         *     matrix.translate({ dx: dx, dy: dy }),
+         *     textGroup.getTransform()
+         * ]));
+         * In general, this should never be necessary unless you are doing advanced
+         * placement of your text.
+         *
+         * Advanced Layout Functionality
+         * In addition to straight text fragments, draw() supports a few advanced
+         * operations not normally available with vector graphics:
+         *
+         * Flow operations (i.e. wrap to a given width)
+         * Fitting operations (i.e. find a best fit to a given rectangle)
+         * To enable either, pass a fitting property along with the textArgs object.
+         * The possible values are contained in the dojox/gfx.vectorFontFitting enum
+         * (NONE, FLOW, FIT).
+         *
+         * Flow fitting
+         * Flow fitting requires both a passed size (in the fontArgs object) and a
+         * width (passed with the textArgs object).  draw() will attempt to split the
+         * passed text up into lines, at the closest whitespace according to the
+         * passed width.  If a width is missing, it will revert to NONE.
+         *
+         * Best fit fitting
+         * Doing a "best fit" means taking the passed text, and finding the largest
+         * size and line breaks so that it is the closest fit possible.  With best
+         * fit, any size arguments are ignored; if a height is missing, it will revert
+         * to NONE.
+         *
+         * Other notes
+         * a11y
+         * Since the results of this method are rendering using pure paths (think
+         * "convert to outlines" in Adobe Illustrator), any text rendered by this
+         * code is NOT considered a11y-friendly.  If a11y is a requirement, we
+         * suggest using other, more a11y-friendly methods.
+         *
+         * Font sources
+         * Always make sure that you are legally allowed to use any fonts that you
+         * convert to SVG format; we claim no responsibility for any licensing
+         * infractions that may be caused by the use of this code.
+         *
+         * @param group
+         * @param textArgs
+         * @param fontArgs
+         * @param fillArgs
+         * @param strokeArgs
+         */
+        draw(group: shape.Container, textArgs: Text, fontArgs: Font, fillArgs: defaultFill | defaultPattern | defaultLinearGradient | defaultRadialGradient, strokeArgs: defaultStroke): any;
+        /**
+         * Find the baseline coord for alignment; adjust for scale if passed.
+         *
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getBaseline(scale: number): number;
+        /**
+         * return the y coordinate that is the center of the viewbox.
+         *
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getCenterline(scale: number): number;
+        /**
+         * return the height of a single line, sans leading, based on scale.
+         *
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getLineHeight(scale: number): number;
+        /**
+         * Get the width of the rendered text without actually rendering it.
+         *
+         * @param text The string to measure.
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getWidth(text: String, scale: number): number;
+        /**
+         * Return if we've loaded a font def, and the parsing was successful.
+         *
+         */
+        initialized(): boolean;
+        /**
+         * Load the passed SVG and send it to the parser for parsing.
+         *
+         * @param url The svg to parse.
+         */
+        load(url: String): Function;
+        /**
+         * Load the passed SVG and send it to the parser for parsing.
+         *
+         * @param url The svg to parse.
+         */
+        load(url: DojoJS.Url): Function;
+        /**
+         *
+         * @param font
+         */
+        onLoad(font: VectorText): void;
+        /**
+         *
+         * @param url
+         */
+        onLoadBegin(url: String): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/VectorText.html
+     *
+     * An implementation of the SVG Font 1.1 spec, using dojox/gfx.
+     *
+     * Basic interface:
+     *
+     * var f = new gfx.Font(url|string);
+     * surface||group.createVectorText(text)
+     * .setFill(fill)
+     * .setStroke(stroke)
+     * .setFont(fontStyleObject);
+     * The arguments passed to createVectorText are the same as you would
+     * pass to surface||group.createText; the difference is that this
+     * is entirely renderer-agnostic, and the return value is a subclass
+     * of dojox/gfx.Group.
+     *
+     * Note also that the "defaultText" object is slightly different:
+     * { type:"vectortext", x:0, y:0, width:null, height: null,
+     * text: "", align: "start", decoration: "none" }
+     *
+     * ...as well as the "defaultVectorFont" object:
+     * { type:"vectorfont", size:"10pt" }
+     *
+     * The reason for this should be obvious: most of the style for the font is defined
+     * by the font object itself.
+     *
+     * Note that this will only render IF and WHEN you set the font.
+     *
+     * @param url An url pointing to the SVG Font definition.
+     */
+    export class VectorText {
+        constructor(url: String);
+        /**
+         * based on the passed parameters, draw the given text using paths
+         * defined by this font.
+         * The main method of a VectorFont, draw() will take a text fragment
+         * and render it in a set of groups and paths based on the parameters
+         * passed.
+         *
+         * The basics of drawing text are simple enough: pass it your text as
+         * part of the textArgs object, pass size and family info as part of
+         * the fontArgs object, pass at least a color as the fillArgs object,
+         * and if you are looking to create an outline, pass the strokeArgs
+         * object as well. fillArgs and strokeArgs are the same as any other
+         * gfx fill and stroke arguments; they are simply applied to any path
+         * object generated by this method.
+         *
+         * Resulting GFX structure
+         * The result of this function is a set of gfx objects in the following structure:
+         *
+         * gfx.Group           //      the parent group generated by this function
+         * +   gfx.Group[]     //      a group generated for each line of text
+         *     +   gfx.Path[]  //      each glyph/character in the text
+         * Scaling transformations (i.e. making the generated text the correct size)
+         * are always applied to the parent Group that is generated (i.e. the top
+         * node in the above example).  In theory, if you are looking to do any kind
+         * of other transformations (such as a translation), you should apply it to
+         * the group reference you pass to this method.  If you find that you need
+         * to apply transformations to the group that is returned by this method,
+         * you will need to reapply the scaling transformation as the last transform,
+         * like so:
+         *
+         * textGroup.setTransform(new matrix.Matrix2D([
+         *     matrix.translate({ dx: dx, dy: dy }),
+         *     textGroup.getTransform()
+         * ]));
+         * In general, this should never be necessary unless you are doing advanced
+         * placement of your text.
+         *
+         * Advanced Layout Functionality
+         * In addition to straight text fragments, draw() supports a few advanced
+         * operations not normally available with vector graphics:
+         *
+         * Flow operations (i.e. wrap to a given width)
+         * Fitting operations (i.e. find a best fit to a given rectangle)
+         * To enable either, pass a fitting property along with the textArgs object.
+         * The possible values are contained in the dojox/gfx.vectorFontFitting enum
+         * (NONE, FLOW, FIT).
+         *
+         * Flow fitting
+         * Flow fitting requires both a passed size (in the fontArgs object) and a
+         * width (passed with the textArgs object).  draw() will attempt to split the
+         * passed text up into lines, at the closest whitespace according to the
+         * passed width.  If a width is missing, it will revert to NONE.
+         *
+         * Best fit fitting
+         * Doing a "best fit" means taking the passed text, and finding the largest
+         * size and line breaks so that it is the closest fit possible.  With best
+         * fit, any size arguments are ignored; if a height is missing, it will revert
+         * to NONE.
+         *
+         * Other notes
+         * a11y
+         * Since the results of this method are rendering using pure paths (think
+         * "convert to outlines" in Adobe Illustrator), any text rendered by this
+         * code is NOT considered a11y-friendly.  If a11y is a requirement, we
+         * suggest using other, more a11y-friendly methods.
+         *
+         * Font sources
+         * Always make sure that you are legally allowed to use any fonts that you
+         * convert to SVG format; we claim no responsibility for any licensing
+         * infractions that may be caused by the use of this code.
+         *
+         * @param group
+         * @param textArgs
+         * @param fontArgs
+         * @param fillArgs
+         * @param strokeArgs
+         */
+        draw(group: shape.Container, textArgs: Text, fontArgs: Font, fillArgs: defaultFill | defaultPattern | defaultLinearGradient | defaultRadialGradient, strokeArgs: defaultStroke): any;
+        /**
+         * Find the baseline coord for alignment; adjust for scale if passed.
+         *
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getBaseline(scale: number): number;
+        /**
+         * return the y coordinate that is the center of the viewbox.
+         *
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getCenterline(scale: number): number;
+        /**
+         * return the height of a single line, sans leading, based on scale.
+         *
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getLineHeight(scale: number): number;
+        /**
+         * Get the width of the rendered text without actually rendering it.
+         *
+         * @param text The string to measure.
+         * @param scale               Optionalan optional scaling factor.
+         */
+        getWidth(text: String, scale: number): number;
+        /**
+         * Return if we've loaded a font def, and the parsing was successful.
+         *
+         */
+        initialized(): boolean;
+        /**
+         * Load the passed SVG and send it to the parser for parsing.
+         *
+         * @param url The svg to parse.
+         */
+        load(url: String): Function;
+        /**
+         * Load the passed SVG and send it to the parser for parsing.
+         *
+         * @param url The svg to parse.
+         */
+        load(url: DojoJS.Url): Function;
+        /**
+         *
+         * @param font
+         */
+        onLoad(font: VectorText): void;
+        /**
+         *
+         * @param url
+         */
+        onLoadBegin(url: String): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/arc.html
+     *
+     * This module contains the core graphics Arc functions.
+     *
+     */
+    export interface arc {
+        /**
+         * an object with properties of an arc around a unit circle from 0 to pi/4
+         *
+         */
+        curvePI4: Object;
+        /**
+         * calculates an arc as a series of Bezier curves
+         * given the last point and a standard set of SVG arc parameters,
+         * it returns an array of arrays of parameters to form a series of
+         * absolute Bezier curves.
+         *
+         * @param last a point-like object as a start of the arc
+         * @param rx a horizontal radius for the virtual ellipse
+         * @param ry a vertical radius for the virtual ellipse
+         * @param xRotg a rotation of an x axis of the virtual ellipse in degrees
+         * @param large which part of the ellipse will be used (the larger arc if true)
+         * @param sweep direction of the arc (CW if true)
+         * @param x the x coordinate of the end point of the arc
+         * @param y the y coordinate of the end point of the arc
+         */
+        arcAsBezier(last: Object, rx: number, ry: number, xRotg: number, large: boolean, sweep: boolean, x: number, y: number): any[];
+        /**
+         * return a start point, 1st and 2nd control points, and an end point of
+         * a an arc, which is reflected on the x axis
+         *
+         * @param alpha angle in radians, the arc will be 2 * angle size
+         */
+        unitArcAsBezier(alpha: number): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/bezierutils.html
+     *
+     *
+     */
+    export interface bezierutils {
+        /**
+         * Returns the length of the given bezier curve.
+         *
+         * @param points The bezier points. Should be [p1x, p1y, c1x, c1y, c2x, c2y, p2x, p2y] for a cubicbezier curve or [p1x, p1y, cx, cy, p2x, p2y] for a quadratic bezier curve.
+         */
+        computeLength(points: number[]): number;
+        /**
+         * Returns the distance between the specified points.
+         *
+         * @param x1
+         * @param y1
+         * @param x2
+         * @param y2
+         */
+        distance(x1: any, y1: any, x2: any, y2: any): any;
+        /**
+         *
+         * @param points
+         * @param t
+         */
+        splitBezierAtT(points: any, t: any): any;
+        /**
+         * Returns the t corresponding to the given length for the specified bezier curve.
+         *
+         * @param points The bezier points. Should be [p1x, p1y, c1x, c1y, c2x, c2y, p2x, p2y] for a cubicbezier curve or [p1x, p1y, cx, cy, p2x, p2y] for a quadratic bezier curve.
+         * @param length The length.
+         */
+        tAtLength(points: number[], length: number): number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/canvas.html
+     *
+     * This the graphics rendering bridge for W3C Canvas compliant browsers.
+     * Since Canvas is an immediate mode graphics api, with no object graph or
+     * eventing capabilities, use of this module alone will only add in drawing support.
+     * The additional module, canvasWithEvents extends this module with additional support
+     * for handling events on Canvas.  By default, the support for events is now included
+     * however, if only drawing capabilities are needed, canvas event module can be disabled
+     * using the dojoConfig option, canvasEvents:true|false.
+     * The id of the Canvas renderer is 'canvas'.  This id can be used when switch Dojo's
+     * graphics context between renderer implementations.  See dojox/gfx/_base.switchRenderer
+     * API.
+     *
+     */
+    export interface canvas {
+        /**
+         *
+         */
+        attachNode(): void;
+        /**
+         *
+         */
+        attachSurface(): void;
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         * creates a surface (Canvas)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px"
+         * @param height height of surface, e.g., "100px"
+         */
+        createSurface(parentNode: HTMLElement, width: String, height: String): any;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/canvas_attach.html
+     *
+     * This the graphics rendering bridge for W3C Canvas compliant browsers.
+     * Since Canvas is an immediate mode graphics api, with no object graph or
+     * eventing capabilities, use of this module alone will only add in drawing support.
+     * The additional module, canvasWithEvents extends this module with additional support
+     * for handling events on Canvas.  By default, the support for events is now included
+     * however, if only drawing capabilities are needed, canvas event module can be disabled
+     * using the dojoConfig option, canvasEvents:true|false.
+     * The id of the Canvas renderer is 'canvas'.  This id can be used when switch Dojo's
+     * graphics context between renderer implementations.  See dojox/gfx/_base.switchRenderer
+     * API.
+     *
+     */
+    export interface canvas_attach {
+        /**
+         *
+         */
+        attachNode(): void;
+        /**
+         *
+         */
+        attachSurface(): void;
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         * creates a surface (Canvas)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px"
+         * @param height height of surface, e.g., "100px"
+         */
+        createSurface(parentNode: HTMLElement, width: String, height: String): any;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/canvasext.html
+     *
+     * A module that adds canvas-specific features to the gfx api. You should require this module
+     * when your application specifically targets the HTML5 Canvas renderer.
+     *
+     */
+    export interface canvasext {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/canvasWithEvents.html
+     *
+     * This the graphics rendering bridge for W3C Canvas compliant browsers which extends
+     * the basic canvas drawing renderer bridge to add additional support for graphics events
+     * on Shapes.
+     * Since Canvas is an immediate mode graphics api, with no object graph or
+     * eventing capabilities, use of the canvas module alone will only add in drawing support.
+     * This additional module, canvasWithEvents extends this module with additional support
+     * for handling events on Canvas.  By default, the support for events is now included
+     * however, if only drawing capabilities are needed, canvas event module can be disabled
+     * using the dojoConfig option, canvasEvents:true|false.
+     *
+     */
+    export interface canvasWithEvents {
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         * creates a surface (Canvas)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px"
+         * @param height height of surface, e.g., "100px"
+         */
+        createSurface(parentNode: HTMLElement, width: String, height: String): void;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.defaultFont.html
+     *
+     * An object specifying the default properties for a Font used in text operations.
+     *
+     */
+    export interface defaultFont {
+        /**
+         * The font family, one of 'serif', 'sanserif', ..., default value 'serif'.
+         *
+         */
+        family: string;
+        /**
+         * The font size (including units), default value '10pt'.
+         *
+         */
+        size: string;
+        /**
+         * The font style, one of 'normal', 'bold', default value 'normal'.
+         *
+         */
+        style: string;
+        /**
+         * Specifies this object is a Font, value 'font'.
+         *
+         */
+        type: string;
+        /**
+         * The font variant, one of 'normal', ... , default value 'normal'.
+         *
+         */
+        variant: string;
+        /**
+         * The font weight, one of 'normal', ..., default value 'normal'.
+         *
+         */
+        weight: string;
+    }
+    interface defaultFill {
+        type?: undefined;
+        color?: string | Color;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Fill.html
+     *
+     * Defines how to fill a shape. Four types of fills can be used: solid, linear gradient, radial gradient and pattern.
+     * See dojox/gfx.LinearGradient, dojox/gfx.RadialGradient and dojox/gfx.Pattern respectively for more information about the properties supported by each type.
+     *
+     */
+    class Fill {
+        type?: 'linear' | 'radial' | 'pattern';
+        color?: string | Color;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.defaultPattern.html
+     *
+     * An object specifying the default properties for a Pattern using in fill operations.
+     *
+     */
+    export interface defaultPattern {
+        /**
+         * Specifies this object is a Pattern, value 'pattern'.
+         *
+         */
+        type: 'pattern';
+        /**
+         * A url specifying the image to use for the pattern.
+         *
+         */
+        src: string;
+        /**
+         * The X coordinate of the position of the pattern, default value is 0.
+         *
+         */
+        x?: number;
+        /**
+         * The Y coordinate of the position of the pattern, default value is 0.
+         *
+         */
+        y?: number;
+        /**
+         * The width of the pattern image, default value is 0.
+         *
+         */
+        width?: number;
+        /**
+         * The height of the pattern image, default value is 0.
+         *
+         */
+        height?: number;
+    }
+    /**
+     * An object specifying the default properties for a Pattern using in fill operations.
+     *
+     */
+    export class Pattern extends Fill {
+        /**
+         * Specifies this object is a Pattern, value 'pattern'.
+         *
+         */
+        type: 'pattern';
+        /**
+         * A url specifying the image to use for the pattern.
+         *
+         */
+        src: string;
+        /**
+         * The X coordinate of the position of the pattern, default value is 0.
+         *
+         */
+        x: number;
+        /**
+         * The Y coordinate of the position of the pattern, default value is 0.
+         *
+         */
+        y: number;
+        /**
+         * The width of the pattern image, default value is 0.
+         *
+         */
+        width: number;
+        /**
+         * The height of the pattern image, default value is 0.
+         *
+         */
+        height: number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.defaultLinearGradient.html
+     *
+     * An object defining the default stylistic properties used for Linear Gradient fills.
+     * Linear gradients are drawn along a virtual line, which results in appearance of a rotated pattern in a given direction/orientation.
+     *
+     */
+    export interface defaultLinearGradient {
+        /**
+         * Specifies this object is a Linear Gradient, value 'linear'
+         *
+         */
+        type: 'linear';
+        /**
+         * An array of colors at given offsets (from the start of the line).  The start of the line is
+         * defined at offest 0 with the end of the line at offset 1.
+         * Default value, [{ offset: 0, color: 'black'},{offset: 1, color: 'white'}], is a gradient from black to white.
+         *
+         */
+        colors?: {offset: number, color: string | Color}[];
+        /**
+         * The X coordinate of the start of the virtual line along which the gradient is drawn, default value 0.
+         *
+         */
+        x1?: number;
+        /**
+         * The X coordinate of the end of the virtual line along which the gradient is drawn, default value 100.
+         *
+         */
+        x2?: number;
+        /**
+         * The Y coordinate of the start of the virtual line along which the gradient is drawn, default value 0.
+         *
+         */
+        y1?: number;
+        /**
+         * The Y coordinate of the end of the virtual line along which the gradient is drawn, default value 100.
+         *
+         */
+        y2?: number;
+    }
+    /**
+     * Specifies the properties for LinearGradients using in fills patterns.
+     *
+     */
+    export class LinearGradient extends Fill {
+        /**
+         * Specifies this object is a Linear Gradient, value 'linear'
+         *
+         */
+        type: 'linear';
+        /**
+         * An array of colors at given offsets (from the start of the line).  The start of the line is
+         * defined at offest 0 with the end of the line at offset 1.
+         * Default value, [{ offset: 0, color: 'black'},{offset: 1, color: 'white'}], is a gradient from black to white.
+         *
+         */
+        colors: {offset: number, color: string | Color}[];
+        /**
+         * The X coordinate of the start of the virtual line along which the gradient is drawn, default value 0.
+         *
+         */
+        x1: number;
+        /**
+         * The X coordinate of the end of the virtual line along which the gradient is drawn, default value 100.
+         *
+         */
+        x2: number;
+        /**
+         * The Y coordinate of the start of the virtual line along which the gradient is drawn, default value 0.
+         *
+         */
+        y1: number;
+        /**
+         * The Y coordinate of the end of the virtual line along which the gradient is drawn, default value 100.
+         *
+         */
+        y2: number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.defaultRadialGradient.html
+     *
+     * An object specifying the default properties for RadialGradients using in fills patterns.
+     *
+     */
+    export interface defaultRadialGradient {
+        /**
+         * Specifies this is a RadialGradient, value 'radial'
+         *
+         */
+        type: 'radial';
+        /**
+         * An array of colors at given offsets (from the center of the radial gradient).
+         * The center is defined at offest 0 with the outer edge of the gradient at offset 1.
+         * Default value, [{ offset: 0, color: 'black'},{offset: 1, color: 'white'}], is a gradient from black to white.
+         *
+         */
+        colors?: any[];
+        /**
+         * The X coordinate of the center of the radial gradient, default value 0.
+         *
+         */
+        cx?: number;
+        /**
+         * The Y coordinate of the center of the radial gradient, default value 0.
+         *
+         */
+        cy?: number;
+        /**
+         * The radius to the end of the radial gradient, default value 100.
+         *
+         */
+        r?: number;
+    }
+    /**
+     * Specifies the properties for RadialGradients using in fills patterns.
+     *
+     */
+    export class RadialGradient extends Fill {
+        /**
+         * Specifies this is a RadialGradient, value 'radial'
+         *
+         */
+        type: 'radial';
+        /**
+         * An array of colors at given offsets (from the center of the radial gradient).
+         * The center is defined at offest 0 with the outer edge of the gradient at offset 1.
+         * Default value, [{ offset: 0, color: 'black'},{offset: 1, color: 'white'}], is a gradient from black to white.
+         *
+         */
+        colors: any[];
+        /**
+         * The X coordinate of the center of the radial gradient, default value 0.
+         *
+         */
+        cx: number;
+        /**
+         * The Y coordinate of the center of the radial gradient, default value 0.
+         *
+         */
+        cy: number;
+        /**
+         * The radius to the end of the radial gradient, default value 100.
+         *
+         */
+        r: number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.defaultStroke.html
+     *
+     * A stroke defines stylistic properties that are used when drawing a path.
+     * This object defines the default Stroke prototype.
+     *
+     */
+    export interface defaultStroke {
+        /**
+         * Specifies this object is a type of Stroke, value 'stroke'.
+         *
+         */
+        type: 'stroke';
+        /**
+         * The endcap style of the path. One of 'butt', 'round', ... . Default value 'butt'.
+         *
+         */
+        cap?: 'butt' | 'round' | 'square';
+        /**
+         * The color of the stroke, default value 'black'.
+         *
+         */
+        color?: string;
+        /**
+         * The join style to use when combining path segments. Default value 4.
+         *
+         */
+        join?: 'round' | 'bevel' | number;
+        /**
+         * The style of the stroke, one of 'solid', ... . Default value 'solid'.
+         *
+         */
+        style?: 'Solid' | 'ShortDash' | 'ShortDot' | 'ShortDashDot' | 'ShortDashDotDot' | 'Dot' | 'Dash' | 'LongDash' | 'DashDot' | 'LongDashDot' | 'LongDashDotDot' | 'none';
+        /**
+         * The width of a stroke, default value 1.
+         *
+         */
+        width?: number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Stroke.html
+     *
+     * A stroke defines stylistic properties that are used when drawing a path.
+     *
+     */
+    export class Stroke {
+        /**
+         * Specifies this object is a type of Stroke, value 'stroke'.
+         *
+         */
+        type: 'stroke';
+        /**
+         * The endcap style of the path. One of 'butt', 'round', ... . Default value 'butt'.
+         *
+         */
+        cap: 'butt' | 'round' | 'square';
+        /**
+         * The color of the stroke, default value 'black'.
+         *
+         */
+        color: string;
+        /**
+         * The join style to use when combining path segments. Default value 4.
+         *
+         */
+        join: 'round' | 'bevel' | number;
+        /**
+         * The style of the stroke, one of 'solid', ... . Default value 'solid'.
+         *
+         */
+        style: 'Solid' | 'ShortDash' | 'ShortDot' | 'ShortDashDot' | 'ShortDashDotDot' | 'Dot' | 'Dash' | 'LongDash' | 'DashDot' | 'LongDashDot' | 'LongDashDotDot' | 'none';
+        /**
+         * The width of a stroke, default value 1.
+         *
+         */
+        width: number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.defaultVectorFont.html
+     *
+     *
+     */
+    export interface defaultVectorFont {
+        /**
+         *
+         */
+        family: Object;
+        /**
+         *
+         */
+        size: string;
+        /**
+         *
+         */
+        type: string;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.defaultVectorText.html
+     *
+     *
+     */
+    export interface defaultVectorText {
+        /**
+         *
+         */
+        align: string;
+        /**
+         *
+         */
+        decoration: string;
+        /**
+         *
+         */
+        fitting: number;
+        /**
+         *
+         */
+        height: Object;
+        /**
+         *
+         */
+        leading: number;
+        /**
+         *
+         */
+        text: string;
+        /**
+         *
+         */
+        type: string;
+        /**
+         *
+         */
+        width: Object;
+        /**
+         *
+         */
+        x: number;
+        /**
+         *
+         */
+        y: number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.Font.html
+     *
+     * An object specifying the properties for a Font used in text operations.
+     *
+     */
+    export interface Font {
+        /**
+         * The font family, one of 'serif', 'sanserif', ..., default value 'serif'.
+         *
+         */
+        family: string;
+        /**
+         * The font size (including units), default value '10pt'.
+         *
+         */
+        size: string;
+        /**
+         * The font style, one of 'normal', 'bold', default value 'normal'.
+         *
+         */
+        style: string;
+        /**
+         * Specifies this object is a Font, value 'font'.
+         *
+         */
+        type: string;
+        /**
+         * The font variant, one of 'normal', ... , default value 'normal'.
+         *
+         */
+        variant: string;
+        /**
+         * The font weight, one of 'normal', ..., default value 'normal'.
+         *
+         */
+        weight: string;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/fx.html
+     *
+     *
+     */
+    export interface fx {
+        /**
+         * Returns an animation which will change fill color over time.
+         * Only solid fill color is supported at the moment
+         *
+         * @param args an object defining the animation setting.
+         */
+        animateFill(args: Object): any;
+        /**
+         * Returns an animation which will change font properties over time.
+         *
+         * @param args an object defining the animation setting.
+         */
+        animateFont(args: Object): void;
+        /**
+         * Returns an animation which will change stroke properties over time.
+         *
+         * @param args an object defining the animation setting.
+         */
+        animateStroke(args: Object): void;
+        /**
+         * Returns an animation which will change transformation over time.
+         *
+         * @param args an object defining the animation setting.
+         */
+        animateTransform(args: Object): any;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/gradient.html
+     *
+     *
+     */
+    export interface gradient {
+        /**
+         * Returns a new gradient using the "VML algorithm" and suitable for VML.
+         *
+         * @param matrix matrix to apply to a shape and its gradient
+         * @param gradient a linear gradient object to be transformed
+         * @param tl top-left corner of shape's bounding box
+         * @param rb right-bottom corner of shape's bounding box
+         * @param ttl top-left corner of shape's transformed bounding box
+         * @param trb right-bottom corner of shape's transformed bounding box
+         */
+        project(matrix: matrix.Matrix2D, gradient: Object, tl: Object, rb: Object, ttl: Object, trb: Object): Object;
+        /**
+         * Returns a new gradient using the "VML algorithm" and suitable for VML.
+         *
+         * @param matrix matrix to apply to a shape and its gradient
+         * @param gradient a linear gradient object to be transformed
+         * @param tl top-left corner of shape's bounding box
+         * @param rb right-bottom corner of shape's bounding box
+         * @param ttl top-left corner of shape's transformed bounding box
+         * @param trb right-bottom corner of shape's transformed bounding box
+         */
+        project(matrix: any, gradient: Object, tl: Object, rb: Object, ttl: Object, trb: Object): Object;
+        /**
+         * Recalculates a gradient from 0-1 window to
+         * "from"-"to" window blending and replicating colors,
+         * if necessary.
+         *
+         * @param stops input gradient as a list of colors with offsets(see dojox/gfx.defaultLinearGradient and dojox/gfx.defaultRadialGradient)
+         * @param from the beginning of the window, should be less than "to"
+         * @param to the end of the window, should be more than "from"
+         */
+        rescale(stops: any[], from: number, to: number): any[];
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/gradutils.html
+     *
+     *
+     */
+    export interface gradutils {
+        /**
+         * sample a color from a gradient using a point
+         *
+         * @param fill fill object
+         * @param pt point where to sample a color
+         */
+        getColor(fill: Object, pt: Object): void;
+        /**
+         * reverses a gradient
+         *
+         * @param fill fill object
+         */
+        reverse(fill: Object): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/move.html
+     *
+     *
+     */
+    export interface move {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/matrix.html
+     *
+     *
+     */
+    export namespace matrix {
+        /**
+         * a matrix, which reflects points at x = 0 line: flipX * (x, y) == (-x, y)
+         *
+         */
+        const flipX: Object;
+        /**
+         * a matrix, which reflects points at the origin of coordinates: flipXY * (x, y) == (-x, -y)
+         *
+         */
+        const flipXY: Object;
+        /**
+         * a matrix, which reflects points at y = 0 line: flipY * (x, y) == (x, -y)
+         *
+         */
+        const flipY: Object;
+        /**
+         * an identity matrix constant: identity * (x, y) == (x, y)
+         *
+         */
+        const identity: Object;
+        /**
+         * creates a copy of a 2D matrix
+         *
+         * @param matrix a 2D matrix-like object to be cloned
+         */
+        function clone(matrix: matrix.Matrix2D): matrix.Matrix2D;
+        /**
+         * inverts a 2D matrix
+         *
+         * @param matrix a 2D matrix-like object to be inverted
+         */
+        function invert(matrix: matrix.Matrix2D): matrix.Matrix2D;
+        /**
+         * returns whether the specified matrix is the identity.
+         *
+         * @param matrix a 2D matrix object to be tested
+         */
+        function isIdentity(matrix: matrix.Matrix2D): boolean;
+
+        /**
+         * combines matrices by multiplying them sequentially in the given order
+         *
+         * @param matrix a 2D matrix-like object,all subsequent arguments are matrix-like objects too
+         */
+        function multiply(matrix: matrix.Matrix2D): any;
+        /**
+         * applies a matrix to a point
+         *
+         * @param matrix a 2D matrix object to be applied
+         * @param a an x coordinate of a point, or a point
+         * @param b               Optionala y coordinate of a point
+         */
+        function multiplyPoint(matrix: matrix.Matrix2D, a: number, b: number): Point;
+        /**
+         * applies a matrix to a point
+         *
+         * @param matrix a 2D matrix object to be applied
+         * @param a an x coordinate of a point, or a point
+         * @param b               Optionala y coordinate of a point
+         */
+        function multiplyPoint(matrix: matrix.Matrix2D, a: Point, b: number): Point;
+        /**
+         * Applies a matrix to a rectangle.
+         * The method applies the transformation on all corners of the
+         * rectangle and returns the smallest rectangle enclosing the 4 transformed
+         * points.
+         *
+         * @param matrix a 2D matrix object to be applied.
+         * @param rect the rectangle to transform.
+         */
+        function multiplyRectangle(matrix: matrix.Matrix2D, rect: Rect): Rect;
+        /**
+         * converts an object to a matrix, if necessary
+         * Converts any 2D matrix-like object or an array of
+         * such objects to a valid dojox/gfx/matrix.Matrix2D object.
+         *
+         * @param matrix an object, which is converted to a matrix, if necessary
+         */
+        function normalize(matrix: Object): matrix.Matrix2D;
+        /**
+         * forms an orthogonal projection matrix
+         * The resulting matrix is used to project points orthogonally on a vector,
+         * which goes through the origin.
+         *
+         * @param a a point-like object, which specifies a vector of projection, oran x coordinate value
+         * @param b               Optionala y coordinate value
+         */
+        function project(a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms an orthogonal projection matrix
+         * The resulting matrix is used to project points orthogonally on a vector,
+         * which goes through the origin.
+         *
+         * @param a a point-like object, which specifies a vector of projection, oran x coordinate value
+         * @param b               Optionala y coordinate value
+         */
+        function project(a: number, b: number): matrix.Matrix2D;
+        /**
+         * forms a reflection matrix
+         * The resulting matrix is used to reflect points around a vector,
+         * which goes through the origin.
+         *
+         * @param a a point-like object, which specifies a vector of reflection, or an X value
+         * @param b               Optionala Y value
+         */
+        function reflect(a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms a reflection matrix
+         * The resulting matrix is used to reflect points around a vector,
+         * which goes through the origin.
+         *
+         * @param a a point-like object, which specifies a vector of reflection, or an X value
+         * @param b               Optionala Y value
+         */
+        function reflect(a: number, b: number): matrix.Matrix2D;
+        /**
+         * forms a rotating matrix
+         * The resulting matrix is used to rotate points
+         * around the origin of coordinates (0, 0) by specified angle.
+         *
+         * @param angle an angle of rotation in radians (>0 for CW)
+         */
+        function rotate(angle: number): matrix.Matrix2D;
+        /**
+         * rotates a picture using a specified point as a center of rotation
+         * Compare with dojox/gfx/matrix.rotate().
+         *
+         * @param angle an angle of rotation in radians (>0 for CW)
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function rotateAt(angle: number, a: number, b: number): matrix.Matrix2D;
+        /**
+         * rotates a picture using a specified point as a center of rotation
+         * Compare with dojox/gfx/matrix.rotate().
+         *
+         * @param angle an angle of rotation in radians (>0 for CW)
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function rotateAt(angle: number, a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms a rotating matrix
+         * The resulting matrix is used to rotate points
+         * around the origin of coordinates (0, 0) by specified degree.
+         * See dojox/gfx/matrix.rotate() for comparison.
+         *
+         * @param degree an angle of rotation in degrees (>0 for CW)
+         */
+        function rotateg(degree: number): matrix.Matrix2D;
+        /**
+         * rotates a picture using a specified point as a center of rotation
+         * Compare with dojox/gfx/matrix.rotateg().
+         *
+         * @param degree an angle of rotation in degrees (>0 for CW)
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function rotategAt(degree: number, a: number, b: number): matrix.Matrix2D;
+        /**
+         * rotates a picture using a specified point as a center of rotation
+         * Compare with dojox/gfx/matrix.rotateg().
+         *
+         * @param degree an angle of rotation in degrees (>0 for CW)
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function rotategAt(degree: number, a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms a scaling matrix
+         * The resulting matrix is used to scale (magnify) points by specified offsets.
+         *
+         * @param a a scaling factor used for the x coordinate, ora uniform scaling factor used for the both coordinates, ora point-like object, which specifies scale factors for both dimensions
+         * @param b               Optionala scaling factor used for the y coordinate
+         */
+        function scale(a: number, b: number): matrix.Matrix2D;
+        /**
+         * forms a scaling matrix
+         * The resulting matrix is used to scale (magnify) points by specified offsets.
+         *
+         * @param a a scaling factor used for the x coordinate, ora uniform scaling factor used for the both coordinates, ora point-like object, which specifies scale factors for both dimensions
+         * @param b               Optionala scaling factor used for the y coordinate
+         */
+        function scale(a: Point, b: number): matrix.Matrix2D;
+        /**
+         * scales a picture using a specified point as a center of scaling
+         * Compare with dojox/gfx/matrix.scale().
+         *
+         * @param a a scaling factor used for the x coordinate, or a uniform scaling factor used for both coordinates
+         * @param b               Optionala scaling factor used for the y coordinate
+         * @param c an x component of a central point, or a central point
+         * @param d a y component of a central point
+         */
+        function scaleAt(a: number, c: number, d: number): matrix.Matrix2D;
+        /**
+         * scales a picture using a specified point as a center of scaling
+         * Compare with dojox/gfx/matrix.scale().
+         *
+         * @param a a scaling factor used for the x coordinate, or a uniform scaling factor used for both coordinates
+         * @param b               Optionala scaling factor used for the y coordinate
+         * @param c an x component of a central point, or a central point
+         * @param d a y component of a central point
+         */
+        function scaleAt(a: number, b: number, c: Point, d: number): matrix.Matrix2D;
+        /**
+         * forms an x skewing matrix
+         * The resulting matrix is used to skew points in the x dimension
+         * around the origin of coordinates (0, 0) by specified angle.
+         *
+         * @param angle a skewing angle in radians
+         */
+        function skewX(angle: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the x axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewX().
+         *
+         * @param angle a skewing angle in radians
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewXAt(angle: number, a: number, b: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the x axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewX().
+         *
+         * @param angle a skewing angle in radians
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewXAt(angle: number, a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms an x skewing matrix
+         * The resulting matrix is used to skew points in the x dimension
+         * around the origin of coordinates (0, 0) by specified degree.
+         * See dojox/gfx/matrix.skewX() for comparison.
+         *
+         * @param degree a skewing angle in degrees
+         */
+        function skewXg(degree: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the x axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewXg().
+         *
+         * @param degree a skewing angle in degrees
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewXgAt(degree: number, a: number, b: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the x axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewXg().
+         *
+         * @param degree a skewing angle in degrees
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewXgAt(degree: number, a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms a y skewing matrix
+         * The resulting matrix is used to skew points in the y dimension
+         * around the origin of coordinates (0, 0) by specified angle.
+         *
+         * @param angle a skewing angle in radians
+         */
+        function skewY(angle: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the y axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewY().
+         *
+         * @param angle a skewing angle in radians
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewYAt(angle: number, a: number, b: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the y axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewY().
+         *
+         * @param angle a skewing angle in radians
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewYAt(angle: number, a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms a y skewing matrix
+         * The resulting matrix is used to skew points in the y dimension
+         * around the origin of coordinates (0, 0) by specified degree.
+         * See dojox/gfx/matrix.skewY() for comparison.
+         *
+         * @param degree a skewing angle in degrees
+         */
+        function skewYg(degree: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the y axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewYg().
+         *
+         * @param degree a skewing angle in degrees
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewYgAt(degree: number, a: number, b: number): matrix.Matrix2D;
+        /**
+         * skews a picture along the y axis using a specified point as a center of skewing
+         * Compare with dojox/gfx/matrix.skewYg().
+         *
+         * @param degree a skewing angle in degrees
+         * @param a an x component of a central point, or a central point
+         * @param b               Optionala y component of a central point
+         */
+        function skewYgAt(degree: number, a: Point, b: number): matrix.Matrix2D;
+        /**
+         * forms a translation matrix
+         * The resulting matrix is used to translate (move) points by specified offsets.
+         *
+         * @param a an x coordinate value, or a point-like object, which specifies offsets for both dimensions
+         * @param b               Optionala y coordinate value
+         */
+        function translate(a: number, b: number): matrix.Matrix2D;
+        /**
+         * forms a translation matrix
+         * The resulting matrix is used to translate (move) points by specified offsets.
+         *
+         * @param a an x coordinate value, or a point-like object, which specifies offsets for both dimensions
+         * @param b               Optionala y coordinate value
+         */
+        function translate(a: Point, b: number): matrix.Matrix2D;
+        /**
+         * a 2D matrix object
+         * Normalizes a 2D matrix-like object. If arrays is passed,
+         * all objects of the array are normalized and multiplied sequentially.
+         *
+         * @param arg a 2D matrix-like object, a number, or an array of such objects
+         */
+        class Matrix2D {
+            constructor(arg: Object);
+        }
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/silverlight_attach.html
+     *
+     * This the graphics rendering bridge for the Microsoft Silverlight plugin.
+     * Silverlight is a faster implementation on IE6-8 than the default 2d graphics, VML
+     *
+     */
+    export interface silverlight_attach {
+        /**
+         * creates a shape from a Node
+         *
+         * @param node a Silverlight node
+         */
+        attachNode(node: HTMLElement): void;
+        /**
+         * creates a surface from a Node
+         *
+         * @param node a Silverlight node
+         */
+        attachSurface(node: HTMLElement): void;
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         * creates a surface (Silverlight)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px"
+         * @param height height of surface, e.g., "100px"
+         */
+        createSurface(parentNode: HTMLElement, width: String, height: String): void;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/silverlight.html
+     *
+     * This the graphics rendering bridge for the Microsoft Silverlight plugin.
+     * Silverlight is a faster implementation on IE6-8 than the default 2d graphics, VML
+     *
+     */
+    export interface silverlight {
+        /**
+         * creates a shape from a Node
+         *
+         * @param node a Silverlight node
+         */
+        attachNode(node: HTMLElement): void;
+        /**
+         * creates a surface from a Node
+         *
+         * @param node a Silverlight node
+         */
+        attachSurface(node: HTMLElement): void;
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         * creates a surface (Silverlight)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px"
+         * @param height height of surface, e.g., "100px"
+         */
+        createSurface(parentNode: HTMLElement, width: String, height: String): void;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/svgext.html
+     *
+     * A module that adds svg-specific features to the gfx api. You should require this module
+     * when your application specifically targets the SVG renderer.
+     *
+     */
+    export interface svgext {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/utils.html
+     *
+     *
+     */
+    export interface utils {
+        /**
+         * Takes a surface or a shape and populates it with an object produced by serialize().
+         *
+         * @param parent The destination container for the deserialized shapes.
+         * @param object The shapes to deserialize.
+         */
+        deserialize(parent: Shape, object: Shape): any;
+        /**
+         * Takes a surface or a shape and populates it with an object produced by serialize().
+         *
+         * @param parent The destination container for the deserialized shapes.
+         * @param object The shapes to deserialize.
+         */
+        deserialize(parent: Shape, object: any[]): any;
+        /**
+         * Takes a shape or a surface and applies a function "f" to in the context of "o"
+         * (or global, if missing). If "shape" was a surface or a group, it applies the same
+         * function to all children recursively effectively visiting all shapes of the underlying scene graph.
+         *
+         * @param object The gfx container to iterate.
+         * @param f The function to apply.
+         * @param o               OptionalThe scope.
+         */
+        forEach(object: Shape, f: Function, o: Object): void;
+        /**
+         * Takes a shape or a surface and applies a function "f" to in the context of "o"
+         * (or global, if missing). If "shape" was a surface or a group, it applies the same
+         * function to all children recursively effectively visiting all shapes of the underlying scene graph.
+         *
+         * @param object The gfx container to iterate.
+         * @param f The function to apply.
+         * @param o               OptionalThe scope.
+         */
+        forEach(object: Shape, f: String, o: Object): void;
+        /**
+         * Takes a shape or a surface and applies a function "f" to in the context of "o"
+         * (or global, if missing). If "shape" was a surface or a group, it applies the same
+         * function to all children recursively effectively visiting all shapes of the underlying scene graph.
+         *
+         * @param object The gfx container to iterate.
+         * @param f The function to apply.
+         * @param o               OptionalThe scope.
+         */
+        forEach(object: Shape, f: any[], o: Object): void;
+        /**
+         * Works just like deserialize() but takes a JSON representation of the object.
+         *
+         * @param parent The destination container for the deserialized shapes.
+         * @param json The shapes to deserialize.
+         */
+        fromJson(parent: Shape, json: String): any;
+        /**
+         * Takes a shape or a surface and returns an object, which describes underlying shapes.
+         *
+         * @param object The container to serialize.
+         */
+        serialize(object: Shape): any;
+        /**
+         * Works just like serialize() but returns a JSON string. If prettyPrint is true, the string is pretty-printed to make it more human-readable.
+         *
+         * @param object The container to serialize.
+         * @param prettyPrint               OptionalIndicates whether the output string should be formatted.
+         */
+        toJson(object: Shape, prettyPrint: boolean): String;
+        /**
+         * Function to serialize a GFX surface to SVG text.
+         * Function to serialize a GFX surface to SVG text.  The value of this output
+         * is that there are numerous serverside parser libraries that can render
+         * SVG into images in various formats.  This provides a way that GFX objects
+         * can be captured in a known format and sent serverside for serialization
+         * into an image.
+         *
+         * @param surface The GFX surface to serialize.
+         */
+        toSvg(surface: Surface): any;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/svg.html
+     *
+     * This the graphics rendering bridge for browsers compliant with W3C SVG1.0.
+     * This is the preferred renderer to use for interactive and accessible graphics.
+     *
+     */
+    export interface svg {
+        /**
+         *
+         */
+        dasharray: Object;
+        /**
+         *
+         */
+        useSvgWeb: boolean;
+        /**
+         *
+         */
+        xmlns: Object;
+        /**
+         * creates a shape from a Node
+         *
+         * @param node an SVG node
+         */
+        attachNode(node: HTMLElement): void;
+        /**
+         * creates a surface from a Node
+         *
+         * @param node an SVG node
+         */
+        attachSurface(node: HTMLElement): void;
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         *
+         * @param parentNode
+         * @param width
+         * @param height
+         */
+        createSurface(parentNode: any, width: any, height: any): void;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         * Adds the gfxElement to event.gfxTarget if none exists. This new
+         * property will carry the GFX element associated with this event.
+         *
+         * @param event The current input event (MouseEvent or TouchEvent)
+         * @param gfxElement The GFX target element
+         */
+        fixTarget(event: Object, gfxElement: Object): void;
+        /**
+         * looks up a node by its external name
+         *
+         * @param name an SVG external reference
+         */
+        getRef(name: String): any;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx.vectorFontFitting.html
+     *
+     *
+     */
+    export interface vectorFontFitting {
+        /**
+         *
+         */
+        FIT: number;
+        /**
+         *
+         */
+        FLOW: number;
+        /**
+         *
+         */
+        NONE: number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/vml.html
+     *
+     * This the default graphics rendering bridge for IE6-7.
+     * This renderer is very slow.  For best performance on IE6-8, use Silverlight plugin.
+     * IE9+ defaults to the standard W3C SVG renderer.
+     *
+     */
+    export interface vml {
+        /**
+         *
+         */
+        text_alignment: Object;
+        /**
+         *
+         */
+        xmlns: string;
+        /**
+         * creates a shape from a Node
+         *
+         * @param node a VML node
+         */
+        attachNode(node: HTMLElement): void;
+        /**
+         * creates a surface from a Node
+         *
+         * @param node a VML node
+         */
+        attachSurface(node: HTMLElement): void;
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         * creates a surface (VML)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px" or 100
+         * @param height height of surface, e.g., "100px" or 100
+         */
+        createSurface(parentNode: HTMLElement, width: String, height: String): any;
+        /**
+         * creates a surface (VML)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px" or 100
+         * @param height height of surface, e.g., "100px" or 100
+         */
+        createSurface(parentNode: HTMLElement, width: number, height: String): any;
+        /**
+         * creates a surface (VML)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px" or 100
+         * @param height height of surface, e.g., "100px" or 100
+         */
+        createSurface(parentNode: HTMLElement, width: String, height: number): any;
+        /**
+         * creates a surface (VML)
+         *
+         * @param parentNode a parent node
+         * @param width width of surface, e.g., "100px" or 100
+         * @param height height of surface, e.g., "100px" or 100
+         */
+        createSurface(parentNode: HTMLElement, width: number, height: number): any;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         * Adds the gfxElement to event.gfxTarget if none exists. This new
+         * property will carry the GFX element associated with this event.
+         *
+         * @param event The current input event (MouseEvent or TouchEvent)
+         * @param gfxElement The GFX target element
+         */
+        fixTarget(event: Object, gfxElement: Object): void;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/filters.html
+     *
+     * A module that defines a minimal API to create SVG filter definition objects to be used with the
+     * dojox/gfx/svgext/Shape.setFilter() API, as well as a set of predefined filters.
+     * The module defines the following API:
+     * - filters.createFilter(config, primitives) : Creates a filter object from the specified config and the
+     * given filter primitives.
+     * - a set of methods to create the corresponding SVG filter primitives, based on the same
+     * naming as the specification (e.g. filters.feGaussianBlur() ). A filter primitive method follows the
+     * following signature (taking feGaussianBlur as an example):
+     *     filters.feGaussianBlur(properties, children?)
+     *     filters.feGaussianBlur(children)
+     * The "properties" parameter must define the primitive attributes as defined by the specification.
+     * The "children" array parameter is an array of child filter primitives.
+     * In addition to this API, the module provides the following predefined filters:
+     * - filters.convolutions.boxBlur3,
+     * - filters.convolutions.boxBlur5,
+     * - filters.convolutions.verticalEdges,
+     * - filters.convolutions.horizontalEdges,
+     * - filters.convolutions.allEdges3,
+     * - filters.convolutions.edgeEnhance,
+     * - filters.shadows.fastSmallDropShadow,
+     * - filters.shadows.fastDropShadow,
+     * - filters.shadows.fastDropShadowLight,
+     * - filters.shadows.dropShadow,
+     * - filters.shadows.dropShadowLight,
+     * - filters.shadows.smallDropShadow,
+     * - filters.shadows.smallDropShadowLight,
+     * - filters.blurs.blur1,
+     * - filters.blurs.blur2,
+     * - filters.blurs.blur4,
+     * - filters.blurs.blur8,
+     * - filters.blurs.glow,
+     * - filters.colors.negate,
+     * - filters.colors.sepia,
+     * - filters.colors.grayscale,
+     * - filters.colors.showRed,
+     * - filters.colors.showGreen,
+     * - filters.colors.showBlue,
+     * - filters.colors.hueRotate60,
+     * - filters.colors.hueRotate120,
+     * - filters.colors.hueRotate180,
+     * - filters.colors.hueRotate270,
+     * - filters.miscs.thinEmbossDropShadow,
+     * - filters.miscs.embossDropShadow,
+     * - filters.miscs.largeEmbossDropShadow,
+     * - filters.miscs.thinEmbossDropShadowLight,
+     * - filters.miscs.embossDropShadowLight,
+     * - filters.miscs.largeEmbossDropShadowLight,
+     * - filters.miscs.fuzzy,
+     * - filters.miscs.veryFuzzy,
+     * - filters.miscs.melting,
+     * - filters.miscs.impressionist,
+     * - filters.miscs.holes,
+     * - filters.miscs.holesComplement,
+     * - filters.reliefs.bumpIn,
+     * - filters.reliefs.bumpOut,
+     * - filters.reliefs.thinEmboss,
+     * - filters.reliefs.emboss,
+     * - filters.reliefs.largeEmboss,
+     * - filters.textures.paper,
+     * - filters.textures.swirl,
+     * - filters.textures.swirl2,
+     * - filters.textures.gold
+     * Note: the dojox/gfx/tests/test_filter.html test shows the rendering of all the predefined filters.
+     *
+     */
+    export interface filters {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/renderer.html
+     *
+     * This module is an AMD loader plugin that loads the appropriate graphics renderer
+     * implementation based on detected environment and current configuration settings.
+     *
+     */
+    export interface renderer {}
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/registry.html
+     *
+     *
+     */
+    export interface registry {
+        /**
+         * Returns the shape that matches the specified id.
+         *
+         * @param id The unique identifier for this Shape.
+         */
+        byId(id: String): Shape;
+        /**
+         * Removes the specified shape from the registry.
+         *
+         * @param s The shape to unregister.
+         * @param recurse               Optional
+         */
+        dispose(s: Shape, recurse: boolean): void;
+        /**
+         * Register the specified shape into the graphics registry.
+         *
+         * @param s The shape to register.
+         */
+        register(s: Shape): number;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.10/dojox/gfx/svg_attach.html
+     *
+     * This the graphics rendering bridge for browsers compliant with W3C SVG1.0.
+     * This is the preferred renderer to use for interactive and accessible graphics.
+     *
+     */
+    export interface svg_attach {
+        /**
+         *
+         */
+        dasharray: Object;
+        /**
+         *
+         */
+        useSvgWeb: boolean;
+        /**
+         *
+         */
+        xmlns: Object;
+        /**
+         * creates a shape from a Node
+         *
+         * @param node an SVG node
+         */
+        attachNode(node: HTMLElement): void;
+        /**
+         * creates a surface from a Node
+         *
+         * @param node an SVG node
+         */
+        attachSurface(node: HTMLElement): void;
+        /**
+         *
+         */
+        Circle(): void;
+        /**
+         *
+         * @param parentNode
+         * @param width
+         * @param height
+         */
+        createSurface(parentNode: any, width: any, height: any): void;
+        /**
+         *
+         */
+        Ellipse(): void;
+        /**
+         * Adds the gfxElement to event.gfxTarget if none exists. This new
+         * property will carry the GFX element associated with this event.
+         *
+         * @param event The current input event (MouseEvent or TouchEvent)
+         * @param gfxElement The GFX target element
+         */
+        fixTarget(event: Object, gfxElement: Object): void;
+        /**
+         * looks up a node by its external name
+         *
+         * @param name an SVG external reference
+         */
+        getRef(name: String): any;
+        /**
+         *
+         */
+        Group(): void;
+        /**
+         *
+         */
+        Image(): void;
+        /**
+         *
+         */
+        Line(): void;
+        /**
+         *
+         */
+        Path(): void;
+        /**
+         *
+         */
+        Polyline(): void;
+        /**
+         *
+         */
+        Rect(): void;
+        /**
+         *
+         */
+        Shape(): void;
+        /**
+         *
+         */
+        Surface(): void;
+        /**
+         *
+         */
+        Text(): void;
+        /**
+         *
+         */
+        TextPath(): void;
+    }
+    /**
+     * Permalink: http://dojotoolkit.org/api/1.9/dojox/gfx/shape.html
+     *
+     * This module contains the core graphics Shape API.
+     * Different graphics renderer implementation modules (svg, canvas, vml, silverlight, etc.) extend this
+     * basic api to provide renderer-specific implementations for each shape.
+     *
+     */
+    export interface shape {
+        /**
+         * Returns the shape that matches the specified id.
+         *
+         * @param id The unique identifier for this Shape.
+         */
+        byId(id: String): Shape;
+
+        /**
+         * Removes the specified shape from the registry.
+         *
+         * @param s The shape to unregister.
+         * @param recurse               Optional
+         */
+        dispose(s: Shape, recurse: boolean): void;
+
+        /**
+         * Register the specified shape into the graphics registry.
+         *
+         * @param s The shape to register.
+         */
+        register(s: Shape): number;
+    }
+    export namespace shape {
+        /**
+         * a container of shapes, which can be used
+         * as a foundation for renderer-specific groups, or as a way
+         * to logically group shapes (e.g, to propagate matricies)
+         *
+         */
+        class Container {}
+        /**
+         * shape creators
+         *
+         */
+        class Creator {}
+    }
+}
+
+declare module 'dojox/gfx/fx' {
+    import gfx = require('dojox/gfx');
+    import Color = require('dojo/_base/Color');
+
+    interface EasingFunction {
+        (n: number): number;
+    }
+    interface AnimationCallback {
+        (node: HTMLElement): void;
+    }
+    interface GfxAnimationArguments {
+        shape: gfx.Shape;
+        duration?: number;
+        easing?: EasingFunction;
+        delay?: number;
+        beforeBegin?: () => void;
+        onBegin?: AnimationCallback;
+        onPlay?: AnimationCallback;
+        onAnimate?: AnimationCallback;
+        onPause?: AnimationCallback;
+        onEnd?: () => void;
+        onStop?: AnimationCallback;
+    }
+    interface TransformAnimationArguments extends GfxAnimationArguments {
+        transform: {name: string, start: any, end: any}[];
+    }
+    interface StrokeAnimationArguments extends GfxAnimationArguments {
+    }
+    interface FontAnimationArguments extends GfxAnimationArguments {
+    }
+    interface FillAnimationArguments extends GfxAnimationArguments {
+    }
+    export function animateTransform(args: TransformAnimationArguments): DojoJS.Animation;
+    export function animateStroke(args: StrokeAnimationArguments): DojoJS.Animation;
+    export function animateFont(args: FontAnimationArguments): DojoJS.Animation;
+    export function animateFill(args: FillAnimationArguments): DojoJS.Animation;
+}
