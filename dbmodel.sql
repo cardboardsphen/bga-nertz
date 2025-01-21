@@ -18,18 +18,20 @@
 -- Note: The database schema is created from this file when the game starts. If you modify this file,
 --       you have to restart a game to see your changes in database.
 
--- Example 1: create a standard "card" table to be used with the "Deck" tools (see example game "hearts"):
+-- ------
+-- The check constraint doesn't work because as of 2024-12-28, BGA uses MySql 5.7.44, which doesn't support check constraints.
+-- Since it doesn't cause an errors, I'm leaving it in for a future upgrade.
+-- It's not critical to anything, but it would be nice to have.
+-- ------
+create table if not exists cards (
+    player int unsigned not null,
+    rank tinyint unsigned not null,
+    suit enum('spade', 'heart', 'club', 'diamond') not null,
+    location enum('nertz', 'tableau', 'stock', 'waste', 'foundation', 'discard') not null,
+    pile_number tinyint unsigned,
+    order_in_pile tinyint unsigned,
 
--- CREATE TABLE IF NOT EXISTS `card` (
---   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
---   `card_type` varchar(16) NOT NULL,
---   `card_type_arg` int(11) NOT NULL,
---   `card_location` varchar(16) NOT NULL,
---   `card_location_arg` int(11) NOT NULL,
---   PRIMARY KEY (`card_id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
-
--- Example 2: add a custom field to the standard "player" table
--- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
-
+    check(rank >= 1 and rank <= 13),
+    foreign key (player) references player (player_id),
+    primary key (player, rank, suit)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

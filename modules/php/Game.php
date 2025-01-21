@@ -23,7 +23,10 @@ namespace Bga\Games\Nertz;
 require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 require_once("autoload.php");
 
+use \Bga\Games\Nertz\Helpers\DatabaseHelpers;
+
 class Game extends \Table {
+    use DatabaseHelpers;
     /**
      * Your global variables labels:
      *
@@ -160,6 +163,16 @@ class Game extends \Table {
      *  according to the game rules, so that the game is ready to be played.
      */
     protected function setupNewGame($players, $options = []) {
+        $this->initPlayers($players);
+        $this->initStatistics();
+
+        $this->dealCards();
+
+        // Activate first player once everything has been initialized and ready.
+        $this->activeNextPlayer();
+    }
+
+    private function initPlayers($players): void {
         // Set the colors of the players with HTML color code. The default below is red/green/blue/orange/brown. The
         // number of colors defined here must correspond to the maximum number of players allowed for the gams.
         $gameinfos = $this->getGameinfos();
@@ -192,14 +205,50 @@ class Game extends \Table {
         $this->reattributeColorsBasedOnPreferences($players, $gameinfos["player_colors"]);
 
         $this->reloadPlayersBasicInfos();
+    }
 
-        // Init global values with their initial values.
-
+    private function initStatistics(): void {
         // Init game statistics.
         //
         // NOTE: statistics used in this file must be defined in your `stats.inc.php` file.
+    }
 
-        // Activate first player once everything has been initialized and ready.
-        $this->activeNextPlayer();
+    private function dealCards(): void {
+        $players = self::getRowsFromDb("SELECT player_id as id from player");
+
+        // dump all cards in db
+        $sql = "INSERT INTO cards (player, rank, suit, location, order_in_pile) values";
+        foreach ($players as $player) {
+            $order = 0;
+            for ($rank = 1; $rank <= 13; $rank++) {
+                foreach (['spade', 'heart', 'club', 'diamond'] as $suit) {
+                    $sql .= "('$player->id', '$rank', '$suit', 'stock', '$order'),";
+                    $order++;
+                }
+            }
+        }
+        $sql = substr($sql, 0, -1);
+        $this->DbQuery($sql);
+
+        // shuffle and deal cards
+        foreach ($players as $player) {
+            $order = range(0, 52);
+            shuffle($order);
+            for ($i = 0; $i < 13; $i++)
+                $this->DbQuery("UPDATE cards set location = 'nertz', order_in_pile = '$i' where player = '$player->id' and location = 'stock' and order_in_pile = '$order[$i]'");
+            for ($i = 0; $i < 4; $i++) {
+                $next = $order[13 + $i];
+                $this->DbQuery("UPDATE cards set location = 'tableau', pile_number = '$i', order_in_pile = 0 where player = '$player->id' and location = 'stock' and order_in_pile = '$next'");
+            }
+
+            $order = range(0, 34);
+            shuffle($order);
+            $cards = self::getRowsFromDb("SELECT rank, suit from cards where player = '$player->id' and location = 'stock'");
+            for ($i = 0; $i < 35; $i++) {
+                $rank = $cards[$i]->rank;
+                $suit = $cards[$i]->suit;
+                $this->DbQuery("UPDATE cards set order_in_pile = '$order[$i]' where player = '$player->id' and rank = '$rank' and suit = '$suit'");
+            }
+        }
     }
 }
