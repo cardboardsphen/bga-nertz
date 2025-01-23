@@ -23,7 +23,8 @@ namespace Bga\Games\Nertz;
 require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 require_once("autoload.php");
 
-use \Bga\Games\Nertz\Helpers\DatabaseHelpers;
+use Bga\Games\Nertz\Helpers\DatabaseHelpers;
+use Bga\Games\Nertz\Models\Card;
 
 class Game extends \Table {
     use DatabaseHelpers;
@@ -143,6 +144,26 @@ class Game extends \Table {
         $result['players'] = $this->getCollectionFromDb(
             "SELECT player_id as id, player_score as score, player_color as color FROM player"
         );
+
+        $result['cards'] = [];
+        $players = self::getRowsFromDb("SELECT player_id as id from player");
+        foreach ($players as $player) {
+            $cardResults = [];
+
+            $card = Card::fromDb(self::getFirstRowFromDb("SELECT rank, suit from cards where player = '$player->id' and location = 'nertz' order by order_in_pile desc limit 1"));
+            $cardResults['nertz'] = $card?->getShortName();
+            for ($i = 0; $i < 4; $i++) {
+                $cards = self::getRowsFromDb("SELECT rank, suit from cards where player = '$player->id' and location = 'tableau' and pile_number = $i order by order_in_pile");
+                $cardResults['tableau'][] = array_map(fn($card) => Card::fromDb($card)->getShortName(), $cards);
+            }
+
+            $result['cards'][$player->id] = $cardResults;
+        }
+        $piles = self::getRowsFromDb("SELECT distinct pile_number from cards where location = 'foundation' order by pile_number");
+        foreach ($piles as $pile) {
+            $cards = self::getRowsFromDb("SELECT rank, suit from cards where location = 'foundation' and pile_number = '$pile->pileNumber'");
+            $result['cards']['foundations'][$pile->pileNumber] = array_map(fn($card) => Card::fromDb($card)->getShortName(), $cards);
+        }
 
         $result['version'] = $this->getGameStateValue('game_db_version');
 
